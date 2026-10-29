@@ -1,0 +1,1 @@
+<view class="bunny {{small?'small':''}}" aria-hidden="true"><view class="ear left"><view/></view><view class="ear right"><view/></view><view class="face"><view class="eye one"/><view class="eye two"/><view class="blush one"/><view class="blush two"/><text class="nose">⌄</text></view></view>

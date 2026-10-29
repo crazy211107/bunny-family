@@ -1,0 +1,17 @@
+/* 适配层：窄屏/宽屏两档，以及减少动效偏好
+   原则：只调边距与字号，不缩放控件 */
+
+/* ---------- 响应式：窄屏再收一档，宽屏不放大 ---------- */
+@media screen and (max-width: 340px) {
+  .page { padding: 8rpx 24rpx calc(186rpx + env(safe-area-inset-bottom)); }
+  .title { font-size: 42rpx; }
+  .paper-card { padding: 20rpx 22rpx; }
+  .cell-title { font-size: 25rpx; }
+}
+@media screen and (min-width: 420px) {
+  .page { padding: 12rpx 36rpx calc(186rpx + env(safe-area-inset-bottom)); }
+}
+@media screen and (min-width: 600px) {
+  .page { max-width: 600px; margin: 0 auto; }
+  .drawer { max-width: 600px; left: auto; }
+}

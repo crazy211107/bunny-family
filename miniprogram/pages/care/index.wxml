@@ -1,0 +1,85 @@
+<page-top />
+<view class="page care-page">
+  <view class="care-heading"><text class="care-kicker">FAMILY CARE CLUB · 我们的小分工</text><text class="title">把小事，照顾成日常</text><text class="subtitle">谁来添草、什么时候补给，都贴在这本小手账里。</text></view>
+  <view class="care-opening">
+    <view class="care-opening-copy"><text>有你轮流上场，</text><text>每天都被好好照顾 ♡</text><text class="care-opening-foot">计划 · 分工 · 补给 · 交接</text></view>
+    <view class="care-cast"><view wx:for="{{petPortraits}}" wx:key="id" class="care-cast-photo"><image src="{{item.photo}}" mode="aspectFill" /><text>{{item.name}}</text></view></view>
+  </view>
+  <view class="care-tabs"><view class="care-tab {{tab === 'daily' ? 'active' : ''}}" data-tab="daily" bindtap="changeTab" aria-role="button" aria-label="照顾打卡，{{tab === 'daily' ? '已选择' : '未选择'}}">照顾打卡<text>盖一枚小印章</text></view><view class="care-tab {{tab === 'schedule' ? 'active' : ''}}" data-tab="schedule" bindtap="changeTab" aria-role="button" aria-label="照顾日程，{{tab === 'schedule' ? '已选择' : '未选择'}}">照顾日程<text>一张张小便签</text></view><view class="care-tab {{tab === 'supplies' ? 'active' : ''}}" data-tab="supplies" bindtap="changeTab" aria-role="button" aria-label="补给抽屉，{{tab === 'supplies' ? '已选择' : '未选择'}}">补给抽屉<text>{{lowCount ? lowCount + ' 件等补货' : '生活小储备'}}</text></view></view>
+
+  <view wx:if="{{feedback && tab === 'daily'}}" class="daily-feedback" aria-role="alert">{{feedback}}</view>
+  <block wx:if="{{tab === 'daily'}}">
+    <view class="daily-book">
+      <view class="daily-book-tape"></view>
+      <view class="daily-book-heading"><view><text class="daily-book-kicker">little care, big love</text><text class="daily-book-title">今天的照顾小票 ♡</text></view><text class="daily-book-count">{{dailyDone}} / {{dailyTotal}}</text></view>
+      <view class="daily-book-date"><picker mode="date" value="{{selectedDay}}" end="{{today}}" bindchange="dateChange"><view aria-role="button" aria-label="选择打卡日期，当前{{selectedDay}}">{{selectedDay}}<text> 换一天 ⌄</text></view></picker><button wx:if="{{!editableToday}}" class="daily-inline-button" bindtap="returnToday">回今天</button><text wx:else>全家已记录的小事</text></view>
+      <text class="daily-book-help">{{editableToday ? '照顾好了再盖章；记错了，也可以轻轻撤销。' : '这一页只供回看，照顾打卡留给今天。'}}</text>
+      <view class="daily-pet-filters"><button wx:for="{{dailyPets}}" wx:key="id" class="daily-filter {{dailyPet === item.id ? 'selected' : ''}}" data-field="dailyPet" data-value="{{item.id}}" bindtap="dailyFilter" aria-pressed="{{dailyPet === item.id}}">{{item.name}}</button></view>
+      <view class="daily-status-filters"><button class="daily-status {{dailyStatus === 'all' ? 'selected' : ''}}" data-field="dailyStatus" data-value="all" bindtap="dailyFilter" aria-pressed="{{dailyStatus === 'all'}}">全部</button><button class="daily-status {{dailyStatus === 'pending' ? 'selected' : ''}}" data-field="dailyStatus" data-value="pending" bindtap="dailyFilter" aria-pressed="{{dailyStatus === 'pending'}}">还没记录</button><button class="daily-status {{dailyStatus === 'done' ? 'selected' : ''}}" data-field="dailyStatus" data-value="done" bindtap="dailyFilter" aria-pressed="{{dailyStatus === 'done'}}">已经记好</button></view>
+      <view wx:for="{{dailyRows}}" wx:key="id" class="daily-row {{item.done ? 'done' : ''}}">
+        <button class="daily-select {{item.selected ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectDaily" disabled="{{!editableToday || item.done}}" aria-label="选择{{item.petName}}的{{item.label}}" aria-pressed="{{item.selected}}"><view>{{item.selected ? '✓' : ''}}</view></button>
+        <image src="{{item.photo}}" mode="aspectFill" class="daily-pet-photo" /><view class="daily-row-copy"><text>{{item.petName}}<text> · {{item.label}}</text></text><text>{{item.done ? '♡ 已记录' + (item.time ? ' · ' + item.time : '') : '未记录，不代表没照顾'}}</text></view>
+        <button class="daily-stamp {{item.done ? 'stamped' : ''}}" data-id="{{item.id}}" bindtap="saveDaily" disabled="{{!editableToday}}" aria-label="{{item.done ? '撤销' : '记录'}}{{item.petName}}的{{item.label}}">{{item.done ? '撤销' : '盖章 ♡'}}</button>
+      </view>
+      <view wx:if="{{!dailyRows.length}}" class="daily-empty"><bunny-mark small /><text>这一页暂时没有小事</text><text>换个筛选，再找找看。</text></view>
+      <view class="daily-book-actions"><button class="daily-batch" bindtap="saveDailyBatch" disabled="{{!editableToday || !dailySelectedCount}}">一起记好{{dailySelectedCount ? '（' + dailySelectedCount + '）' : ''}} ♡</button><button class="daily-copy" bindtap="copyDaily" disabled="{{!dailyRows.length}}">复制小票 ↗</button></view>
+      <text class="daily-book-foot">时间为本机打卡时间；与兔兔档案使用同一份记录。</text>
+    </view>
+  </block>
+  <block wx:elif="{{tab === 'schedule'}}">
+    <view class="care-week-head"><view class="care-arrow" data-delta="-1" bindtap="shiftWeek" aria-role="button" aria-label="上一周">‹</view><picker mode="date" value="{{selectedDay}}" bindchange="dateChange"><view class="care-week-label">{{weekLabel}}<text>点日期，翻到另一天 ⌄</text></view></picker><view class="care-arrow" data-delta="1" bindtap="shiftWeek" aria-role="button" aria-label="下一周">›</view></view>
+    <view class="care-week"><view wx:for="{{week}}" wx:key="day" class="care-day {{item.active ? 'selected' : ''}} {{item.today ? 'today' : ''}}" data-day="{{item.day}}" bindtap="chooseDay" aria-role="button" aria-label="{{item.day}}，{{item.count}}项计划"><text class="care-day-week">{{item.today ? '今' : item.label}}</text><text class="care-day-number">{{item.number}}</text><text class="care-day-status {{item.complete ? 'complete' : ''}}">{{item.count ? item.complete ? '✓' : item.count + '项' : '·'}}</text></view></view>
+    <view class="care-receipt-head"><view><text class="care-section-title">{{selectedLabel}}的照顾小票</text><text class="care-section-note">{{editableToday ? '完成一项，盖一枚小印章。' : '这一天只读，照顾打卡留给今天。'}}</text></view><view wx:if="{{!editableToday}}" class="care-text-action" bindtap="returnToday" aria-role="button">回今天</view><text wx:else="" class="care-count">{{completed}} / {{rows.length}}</text></view>
+    <view wx:if="{{rows.length}}" class="care-timeline">
+      <view wx:for="{{rows}}" wx:key="id" class="care-plan {{item.done ? 'is-done' : ''}}">
+        <view class="care-plan-time"><text>{{item.time || '随时'}}</text><view></view></view>
+        <view class="care-plan-paper"><view class="care-plan-body"><view class="care-check {{item.done ? 'checked' : ''}} {{!editableToday ? 'readonly' : ''}}" data-id="{{item.id}}" bindtap="toggleDone" aria-role="button" aria-label="{{!editableToday ? '只读，' : item.done ? '撤销' : '完成'}}{{item.title}}"><text>{{item.done ? '✓' : '♡'}}</text></view><view class="care-plan-copy"><text class="care-plan-title">{{item.title}}</text><text class="care-plan-meta">{{item.petNames}} · {{item.assigneeName}}</text><text wx:if="{{item.note}}" class="care-plan-note">{{item.note}}</text></view><view class="care-plan-edit" data-id="{{item.id}}" bindtap="openPlan" aria-role="button" aria-label="编辑{{item.title}}">✎</view></view><view class="care-plan-footer"><text>{{item.ruleLabel}}</text><text class="care-stamp">{{item.done ? '♡ 已完成 ' + item.completedLabel : editableToday ? '等待上场' : '未完成'}}</text></view></view>
+      </view>
+    </view>
+    <view wx:else="" class="care-empty"><text class="care-empty-mark">ᕱ⑅ᕱ</text><text>这一天的小票还是空的</text><text>写下真实需要做的事，再请家人一起照顾。</text></view>
+    <view class="care-add pink" bindtap="openPlan" aria-role="button">＋ 写一张照顾便签</view>
+    <view class="care-manage-toggle" bindtap="togglePlans" aria-role="button"><text>计划收纳册 · {{plans.length}} 张</text><text>{{showPlans ? '收起 −' : '展开 ＋'}}</text></view>
+    <view wx:if="{{showPlans}}" class="care-manage-book"><view wx:for="{{plans}}" wx:key="id" class="care-manage-row"><view class="care-manage-title" data-id="{{item.id}}" bindtap="openPlan" aria-role="button"><text>{{item.title}}</text><text>{{item.pets}} · {{item.ruleLabel}} · {{item.enabled ? '进行中' : '已暂停'}}</text></view><view class="care-manage-actions"><view data-id="{{item.id}}" bindtap="togglePlan" aria-role="button">{{item.enabled ? '暂停' : '继续'}}</view><view data-id="{{item.id}}" bindtap="openPlan" aria-role="button">编辑</view><view data-id="{{item.id}}" bindtap="deletePlan" aria-role="button">收起</view></view></view><text wx:if="{{!plans.length}}" class="care-footnote">你的第一张便签，还在等你动笔。</text></view>
+    <view class="care-handover" bindtap="openHandover" aria-role="button"><text class="care-handover-icon">✉</text><view><text>把放心，交给下一位家人</text><text>整理本周记录与照顾交接卡</text></view><text>↗</text></view>
+    <text class="care-footnote">便签提醒会在小程序里显示；打卡与分工保存在本机。</text>
+  </block>
+
+  <block wx:else="">
+    <view class="care-stock-banner"><view><text>补给小管家</text><text>{{lowCount ? '有 ' + lowCount + ' 件到达提醒数量，记得看看。' : '把库存写清楚，出门采购心里就有数。'}}</text></view><text class="care-stock-count">{{shelves.length}}<text>格抽屉</text></text></view>
+    <view class="care-add mint" bindtap="openSupply" aria-role="button">＋ 给补给添一格抽屉</view>
+    <view wx:if="{{!shelves.length}}" class="care-empty"><text class="care-empty-mark">♧</text><text>牧草、兔粮、垫料，各有一格</text><text>从真实库存开始；新抽屉默认 0，补货后再入账。</text></view>
+    <view wx:for="{{shelves}}" wx:key="id" class="care-supply {{item.low ? 'low' : ''}}"><view class="care-supply-top"><view><text class="care-supply-name">{{item.name}}</text><text class="care-supply-pets">{{item.petLabel}}</text></view><view class="care-supply-edit" data-id="{{item.id}}" bindtap="openSupply" aria-role="button" aria-label="编辑{{item.name}}">✎</view></view><view class="care-supply-stock"><view><text>{{item.quantityLabel}}</text><text>{{item.unit}}</text></view><text class="care-supply-status">{{item.low ? '✧ 该补货啦' : '♡ 抽屉里还有'}}</text></view><text class="care-supply-threshold">剩余 ≤ {{item.thresholdLabel}} {{item.unit}}时，贴上补货提醒</text><view class="care-supply-actions"><view class="care-stock-button" data-id="{{item.id}}" data-mode="in" bindtap="openMovement" aria-role="button">＋ 补货</view><view class="care-stock-button use" data-id="{{item.id}}" data-mode="out" bindtap="openMovement" aria-role="button">− 领用</view></view><view class="care-supply-bottom"><view data-id="{{item.id}}" bindtap="toggleHistory" aria-role="button">{{expandedSupply === item.id ? '收起出入库 −' : '最近出入库 ＋'}}</view><view data-id="{{item.id}}" bindtap="deleteSupply" aria-role="button">收起物品</view></view><view wx:if="{{expandedSupply === item.id}}" class="care-stock-history"><view wx:for="{{item.history}}" wx:for-item="movement" wx:key="id"><view><text>{{movement.label}}</text><text>{{movement.note}}</text></view><text>{{movement.time}}</text></view><text wx:if="{{!item.history.length}}">还没有出入库记录，按实际数量登记吧。</text><text wx:else="" class="care-history-note">展示最近四笔，全部记录保存在本机。</text></view></view>
+    <text class="care-footnote">按实际使用的单位记录；领用不能超过库存。</text>
+  </block>
+</view>
+
+<view wx:if="{{drawerKind}}" class="drawer-mask care-drawer-mask" bindtap="closeDrawer" catchtouchmove="stopTap"><view class="drawer care-drawer" style="padding-top:{{safeTop}}px" catchtap="stopTap"><view class="drawer-head"><view><text class="care-drawer-kicker">把细心，贴进每一天</text><text class="care-drawer-title">{{drawerTitle}}</text></view><view class="close" bindtap="closeDrawer" aria-role="button" aria-label="关闭编辑">×</view></view><scroll-view class="care-drawer-body" style="height:0;flex:1" scroll-y="{{true}}">
+  <block wx:if="{{drawerKind === 'plan'}}">
+    <view class="field"><text class="field-label">要做什么照顾小事？</text><input class="input" value="{{form.title}}" data-field="title" aria-label="照顾计划名称" bindinput="formInput" maxlength="40" placeholder="例如：清洗食碗、梳一次毛" /></view>
+    <view class="field"><text class="field-label">为谁准备？（不选代表我们家）</text><view class="pill-options"><view wx:for="{{petOptions}}" wx:key="id" class="pill {{item.active ? 'active' : ''}}" data-id="{{item.id}}" bindtap="togglePet" aria-role="button">{{item.name}} ♡</view></view></view>
+    <view class="field"><text class="field-label">请哪位家人上场？</text><picker mode="selector" range="{{memberOptions}}" range-key="name" value="{{memberIndex}}" bindchange="memberChange"><view class="input care-picker">{{memberOptions[memberIndex].name}}<text>⌄</text></view></picker><text class="care-form-note">本机分工记录；不会向家人发送通知。</text></view>
+    <view class="field"><text class="field-label">重复节奏</text><picker mode="selector" range="{{ruleOptions}}" range-key="name" value="{{ruleIndex}}" bindchange="ruleChange"><view class="input care-picker">{{ruleOptions[ruleIndex].name}}<text>⌄</text></view></picker></view>
+    <view wx:if="{{form.rule === 'weekly'}}" class="field"><text class="field-label">在星期几？</text><view class="care-weekday-options"><view wx:for="{{weekdays}}" wx:key="id" class="{{item.active ? 'active' : ''}}" data-id="{{item.id}}" bindtap="toggleWeekday" aria-role="button">{{item.label}}</view></view></view>
+    <view wx:if="{{form.rule === 'interval'}}" class="field"><text class="field-label">间隔几天？</text><view class="care-inline-input"><text>每隔</text><input class="input" type="number" value="{{form.intervalDays}}" data-field="intervalDays" aria-label="计划间隔天数" bindinput="formInput" maxlength="4" /><text>天</text></view><text class="care-form-note">从开始日期计算，不会因为迟打卡而顺延。</text></view>
+    <view class="field"><text class="field-label">{{form.rule === 'once' ? '计划日期' : '从哪天开始？'}}</text><picker mode="date" value="{{form.startDate}}" bindchange="startDateChange"><view class="input care-picker">{{form.startDate}}<text>⌄</text></view></picker></view>
+    <view class="field"><text class="field-label">时间（可选）</text><picker mode="time" value="{{form.time || '09:00'}}" bindchange="timeChange"><view class="input care-picker">{{form.time || '找个舒服的时间'}}<text>⌄</text></view></picker><view wx:if="{{form.time}}" class="care-clear" bindtap="clearTime" aria-role="button">不指定时间</view></view>
+    <view class="field"><text class="field-label">给家人的小嘱咐（可选）</text><textarea class="textarea" value="{{form.note}}" data-field="note" aria-label="给家人的计划说明" bindinput="formInput" maxlength="300" placeholder="只写下你已确认的照顾习惯" /></view>
+    <view class="care-add pink" bindtap="savePlan" aria-role="button">♡ 把照顾便签贴好</view>
+  </block>
+  <block wx:elif="{{drawerKind === 'supply'}}">
+    <view class="field"><text class="field-label">补给名称</text><input class="input" value="{{form.name}}" data-field="name" aria-label="补给名称" bindinput="formInput" maxlength="30" placeholder="例如：提摩西草、垫料" /></view>
+    <view class="field"><text class="field-label">计量单位</text><input class="input" value="{{form.unit}}" data-field="unit" aria-label="补给计量单位" bindinput="formInput" maxlength="8" placeholder="袋 / kg / 包" /><text class="care-form-note">已有库存时请保持单位一致，以免数量失真。</text></view>
+    <view class="field"><text class="field-label">剩多少时提醒补货？</text><view class="care-inline-input"><input class="input" type="digit" value="{{form.threshold}}" data-field="threshold" aria-label="补货提醒数量" bindinput="formInput" maxlength="12" /><text>{{form.unit || '单位'}}</text></view></view>
+    <view class="field"><text class="field-label">给谁准备？（不选代表共用）</text><view class="pill-options"><view wx:for="{{petOptions}}" wx:key="id" class="pill {{item.active ? 'active' : ''}}" data-id="{{item.id}}" bindtap="togglePet" aria-role="button">{{item.name}} ♡</view></view></view>
+    <view class="care-form-paper">{{form.id ? '库存通过“补货”和“领用”记录增减，每一笔都有来处。' : '新抽屉默认库存为 0。保存后，请通过“补货”登记实际数量。'}}</view>
+    <view class="care-add mint" bindtap="saveSupply" aria-role="button">♡ 收好这格补给</view>
+  </block>
+  <block wx:else="">
+    <view class="care-movement-summary"><text>{{selectedSupply.name}}</text><text>当前 {{selectedSupply.quantity}} {{selectedSupply.unit}}</text></view>
+    <view class="field"><text class="field-label">{{movementMode === 'in' ? '这次补货多少？' : '这次领用多少？'}}</text><view class="care-inline-input"><input class="input care-amount" type="digit" value="{{form.amount}}" data-field="amount" aria-label="本次出入库数量" bindinput="formInput" maxlength="12" placeholder="0" /><text>{{selectedSupply.unit}}</text></view><text class="care-form-note">最多三位小数，按实际数量填写。</text></view>
+    <view class="field"><text class="field-label">留个小备注（可选）</text><input class="input" value="{{form.movementNote}}" data-field="movementNote" aria-label="出入库备注" bindinput="formInput" maxlength="80" placeholder="例如：本周采购、今天开了一袋" /></view>
+    <view class="care-add {{movementMode === 'in' ? 'mint' : 'pink'}}" bindtap="saveMovement" aria-role="button">{{movementMode === 'in' ? '＋ 放进补给抽屉' : '− 记下这次领用'}}</view>
+  </block>
+  <view wx:if="{{feedback}}" class="feedback" aria-role="alert">{{feedback}}</view><view class="care-drawer-space"></view>
+</scroll-view></view></view>
+<bunny-menu />

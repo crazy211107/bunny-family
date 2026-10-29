@@ -1,0 +1,32 @@
+.empty-state {
+  padding: 36rpx 24rpx 32rpx;
+  text-align: center;
+}
+.empty-symbol {
+  display: block;
+  margin-bottom: 14rpx;
+  font-size: 56rpx;
+  line-height: 1.2;
+  color: #d9c3cf;
+}
+.empty-text {
+  display: block;
+  font-size: 26rpx;
+  line-height: 1.9;
+  color: #806c7b;
+}
+.empty-sub {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  line-height: 1.8;
+  color: #806c7b;
+}
+.empty-action {
+  display: inline-flex;
+  margin-top: 26rpx;
+  padding: 0 36rpx;
+}
+.empty-action-hover {
+  transform: scale(.97);
+}

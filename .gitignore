@@ -1,0 +1,10 @@
+node_modules/
+dist/
+output/
+*.log
+.env
+.env.*
+!.env.example
+
+# agent 工作记忆，不属于项目代码
+.workbuddy/

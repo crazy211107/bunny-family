@@ -1,0 +1,15 @@
+<view class="top-space" style="padding-top:{{top}}px">
+  <view wx:if="{{showBack}}" class="top-back" bindtap="back" hover-class="directory-hover" aria-role="button" aria-label="返回上一页">‹</view>
+  <view class="top-brand" bindtap="home" hover-class="directory-hover" aria-role="button" aria-label="返回我们家">
+    <bunny-mark />
+    <view class="brand-text">
+      <text class="brand-name">兔兔小窝 ♡</text>
+      <text class="brand-caption">生活里的可爱，正在放映</text>
+    </view>
+  </view>
+  <view class="directory" bindtap="directory" hover-class="directory-hover" aria-role="button" aria-label="翻开故事目录">
+    <text class="directory-label">翻开目录</text>
+    <text class="directory-spark">✧</text>
+  </view>
+</view>
+<ai-assistant />

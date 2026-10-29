@@ -1,0 +1,133 @@
+<page-top />
+<view class="page pet-page">
+  <view class="pet-header">
+    <text class="page-eyebrow">01 / 小主的成长档案</text>
+    <text class="pet-title">兔兔档案 ♡</text>
+    <text class="pet-sub">照顾、成长与提醒，收在同一页。</text>
+  </view>
+
+  <view class="pet-switch" aria-label="选择兔兔">
+    <view wx:for="{{pets}}" wx:key="id" class="pet-chip {{item.selected ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectPet" hover-class="pet-control-pressed" aria-role="button" aria-label="{{item.name}}{{item.selected ? '，当前已选中' : '，点击切换'}}">
+      <image src="{{item.photo}}" mode="aspectFill" />
+      <text class="pet-chip-name">{{item.name}}</text>
+      <text class="pet-chip-check" wx:if="{{item.selected}}">✓</text>
+    </view>
+  </view>
+
+  <view wx:if="{{pet}}">
+    <!-- 封面：一张大图 + 档案抬头 + 三个当日指标 -->
+    <view class="pet-cover">
+      <image class="cover-photo" src="{{pet.photo}}" mode="aspectFill" />
+      <view class="cover-veil"></view>
+      <view class="cover-photo-change" bindtap="openPetEditor" hover-class="pet-control-pressed" aria-role="button" aria-label="更换{{pet.name}}的档案照片">换照片 ✎</view>
+      <view class="cover-top">
+        <text class="cover-tag">RABBIT FILE</text>
+        <text class="cover-breed">{{pet.breed || '还在慢慢认识你'}}</text>
+      </view>
+      <view class="cover-bottom">
+        <view class="cover-name">{{pet.name}}<text class="cover-heart">♡</text></view>
+        <view class="cover-stats">
+          <view class="cover-stat"><text class="stat-num">{{todayCount}}<text class="stat-unit">/4</text></text><text class="stat-label">今日照顾</text></view>
+          <view class="cover-line"></view>
+          <view class="cover-stat"><text class="stat-num">{{consecutiveDays}}</text><text class="stat-label">连续天数</text></view>
+          <view class="cover-line"></view>
+          <view class="cover-stat"><text class="stat-num">{{recentCount}}</text><text class="stat-label">近 7 天</text></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 档案栏 -->
+    <view class="pet-card file-card">
+      <view class="file-row">
+        <view class="file-cell"><text class="file-label">小小身份</text><text class="file-value">{{pet.breed || '待填写'}}</text></view>
+        <view class="file-cell"><text class="file-label">在这个世界</text><text class="file-value">{{pet.age}}</text></view>
+      </view>
+      <view class="file-row">
+        <view class="file-cell"><text class="file-label">最近体重</text><text class="file-value">{{pet.weight}}</text></view>
+        <view class="file-cell"><text class="file-label">绝育状态</text><text class="file-value">{{pet.neutered}}</text></view>
+      </view>
+      <view class="file-edit" bindtap="openPetEditor" hover-class="file-edit-hover" aria-role="button" aria-label="编辑{{pet.name}}的基本档案">完善这份档案 <text>编辑 ↗</text></view>
+    </view>
+
+    <!-- 今日照顾 -->
+    <view class="pet-card care-card">
+      <view class="card-head">
+        <text class="card-title">今日照顾</text>
+        <text class="card-hint">{{todayCount}} / 4 已完成</text>
+      </view>
+      <view class="care-progress" aria-label="今日照顾进度，已完成{{todayCount}}项，共4项"><view style="width:{{todayCount * 25}}%"></view></view>
+      <view class="care-grid">
+        <view wx:for="{{careButtons}}" wx:key="id" class="care-cell {{item.done ? 'done' : ''}} care-{{index}}" data-id="{{item.id}}" bindtap="toggleCare" hover-class="care-cell-hover" aria-role="button" aria-label="{{pet.name}}{{item.label}}，{{item.done ? '已完成，点击撤销' : '点击打卡'}}">
+          <text class="care-icon">{{item.done ? '✓' : item.symbol}}</text>
+          <text class="care-name">{{item.label}}</text>
+          <text class="care-time">{{item.done ? item.time : '轻轻点一下'}}</text>
+        </view>
+      </view>
+      <view class="care-streak">
+        <text class="streak-badge">{{consecutiveDays >= 7 ? '✦ 兔兔守护者' : '♡ 慢慢集齐每一天的爱'}}</text>
+        <text class="streak-note">{{consecutiveDays}} 天连续完成 · 连续 7 天解锁徽章</text>
+      </view>
+    </view>
+
+    <!-- 照顾节奏：7 天汇总 + 14 天热度 -->
+    <view class="pet-card rhythm-card">
+      <view class="card-head">
+        <text class="card-title">照顾节奏</text>
+        <text class="card-hint">越满越亮</text>
+      </view>
+      <view class="rhythm-summary">
+        <view class="rhythm-cell"><text class="stat-num">{{recentCount}}<text class="stat-unit"> / 28</text></text><text class="stat-label">近 7 天照顾次数</text></view>
+        <view class="rhythm-cell"><text class="stat-num">{{completeDays}}<text class="stat-unit"> / 7</text></text><text class="stat-label">四项都完成</text></view>
+      </view>
+      <view class="heat-row">
+        <view class="heat-cell" wx:for="{{heat}}" wx:key="key" aria-label="{{item.key}}，完成{{item.level}}项照顾">
+          <view class="heat-bar heat-{{item.level}} {{item.isToday ? 'is-today' : ''}}"></view>
+          <text class="heat-day">{{item.label}}</text>
+        </view>
+      </view>
+      <view class="card-note">每格是一天，高度对应当天完成的照顾项；空白代表那天还没记录。</view>
+    </view>
+
+    <!-- 月历 -->
+    <view class="pet-history-heading"><text class="section-title">照顾小月历 ♡</text><text class="subtitle">{{pet.name}}专属，只记下真实发生的照顾。</text></view>
+    <view class="pet-calendar paper-card">
+      <view class="calendar-navigation"><button data-delta="-1" bindtap="moveMonth" aria-label="查看上个月">‹</button><text>{{monthLabel}}</text><button data-delta="1" bindtap="moveMonth" disabled="{{!canNext}}" aria-label="查看下个月">›</button></view>
+      <view class="calendar-week"><text wx:for="{{weekdays}}" wx:key="*this">{{item}}</text></view>
+      <view class="calendar-days">
+        <block wx:for="{{calendar}}" wx:key="id" wx:for-item="cell">
+          <view wx:if="{{cell.blank}}" class="calendar-blank"></view>
+          <button wx:else class="calendar-day {{cell.selected ? 'is-selected' : ''}} {{cell.complete ? 'is-complete' : ''}} {{cell.today ? 'is-today' : ''}}" disabled="{{cell.future}}" data-date="{{cell.date}}" bindtap="selectDay" aria-label="{{cell.aria}}"><text>{{cell.day}}</text><view wx:if="{{!cell.future}}" class="calendar-dots"><view wx:for="{{cell.dots}}" wx:key="id" class="{{item.filled ? 'filled' : ''}}"></view></view></button>
+        </block>
+      </view>
+      <view class="calendar-footer"><text>四颗小圆点，代表四项照顾</text><button bindtap="returnToday">☀ 回到今天</button></view>
+    </view>
+
+    <!-- 当日场记 -->
+    <view class="pet-history-detail paper-card"><view class="detail-tape"></view><text class="detail-kicker">{{selectedDate === today ? '今天的温柔场记' : '翻到这一天的照顾'}}</text><view class="pet-section-line"><text class="detail-date">{{historyLabel}}</text><text class="tag">{{historyCount}} / 4 项</text></view><text class="detail-note">{{selectedDate === today ? '今天的打卡，会同步留下真实时间。' : '历史记录只读，在这里回看每一份温柔。'}}</text>
+      <view wx:for="{{historyRows}}" wx:key="id" class="history-row {{item.done ? 'recorded' : ''}}"><text class="history-symbol">{{item.symbol}}</text><text>{{item.label}}</text><text class="history-time">{{item.time}}</text><text wx:if="{{item.done}}">✓</text></view>
+      <view wx:if="{{historyCount === 0}}" class="history-empty">ᕱ⑅ᕱ {{selectedDate === today ? '今天的第一份照顾，还在等你写下。' : '这一天还没有留下照顾记录。'}}</view>
+    </view>
+
+    <!-- 体重 -->
+    <view class="pet-weight paper-card"><view class="pet-section-line"><text class="section-title">成长的小刻度</text><button class="button pink small-action" bindtap="openWeightEditor">＋ 记体重</button></view>
+      <view wx:if="{{weights.length}}"><text class="weight-help">单位 kg · 横条按这位小主的最高记录等比例绘制</text><view wx:for="{{weights}}" wx:key="date" class="weight-row"><view class="weight-row-top"><button class="weight-record" data-date="{{item.date}}" bindtap="openWeightEditor" aria-label="编辑{{item.date}}体重"><text>{{item.date}}</text><text class="weight-value">{{item.display}} kg</text></button><button class="weight-delete" data-date="{{item.date}}" bindtap="deleteWeight" aria-label="删除{{item.date}}体重">×</button></view><view class="weight-track"><view style="width:{{item.bar}}%;"></view></view></view></view>
+      <view wx:else class="weight-empty"><text class="weight-empty-symbol">ᕱ⑅ᕱ</text><text>还没有成长记录</text><text class="weight-empty-sub">记录真实体重，让每一次变化都有迹可循。</text><button class="button pink" bindtap="openWeightEditor">记录第一笔体重</button></view>
+    </view>
+
+    <!-- 健康提醒 -->
+    <view class="pet-reminders paper-card"><view class="detail-tape"></view><view class="pet-section-line"><text class="section-title">健康小提醒</text><button class="pet-text-button" bindtap="openReminder">＋ 贴便签</button></view><view wx:for="{{reminders}}" wx:key="id" class="cell reminder-cell {{item.urgent ? 'is-urgent' : ''}}">
+        <view class="cell-body"><text class="cell-title">{{item.title}}</text><text class="cell-label">{{item.date}} · {{item.caption}}</text></view>
+        <view class="reminder-del" data-id="{{item.id}}" catchtap="deleteReminder" aria-role="button" aria-label="删除提醒{{item.title}}">×</view>
+      </view><view wx:if="{{!reminders.length}}" class="reminder-empty">还没有提醒。把需要记住的日子，贴在这里吧。<button class="text-btn" bindtap="openReminder">＋ 写下第一条提醒</button></view><text class="health-note">本机记录 · 提醒内容与日期由你填写，不预设医疗周期。</text></view>
+  </view>
+  <view wx:else class="empty">还没有兔兔档案。</view>
+</view>
+
+<view wx:if="{{drawerKind}}" class="drawer-mask pet-drawer-mask" bindtap="closeDrawer" catchtouchmove="stopTap"><view class="drawer pet-drawer" style="padding-top:{{safeTop}}px" catchtap="stopTap"><view class="drawer-head"><view><text class="drawer-kicker">把小日子，好好收起来</text><text class="pet-drawer-title">{{drawerTitle}}</text></view><button class="close" bindtap="closeDrawer" aria-label="关闭抽屉">×</button></view><scroll-view class="pet-drawer-body" scroll-y="{{true}}">
+  <view wx:if="{{drawerKind === 'pet'}}"><view class="pet-photo-editor"><view class="pet-photo-preview" bindtap="choosePetPhoto" hover-class="pet-control-pressed" aria-role="button" aria-label="选择新的兔兔档案照片"><image class="pet-form-avatar" src="{{petForm.photo || pet.photo}}" mode="aspectFill"/><text>✎</text></view><view class="pet-photo-button" bindtap="choosePetPhoto" hover-class="pet-control-pressed" aria-role="button">{{choosingPhoto ? '正在选照片…' : '从手机选择或拍一张'}}</view><text class="pet-photo-hint">也可以从小窝相册挑一帧；保存档案后生效。</text><scroll-view scroll-x class="pet-photo-rail"><view class="pet-photo-choices"><view wx:for="{{petPhotoChoices}}" wx:key="id" class="pet-photo-choice {{petForm.photo === item.src ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectPetPhoto" aria-role="button" aria-label="选择{{item.title}}作为档案照片"><image src="{{item.src}}" mode="aspectFill" lazy-load/><text wx:if="{{petForm.photo === item.src}}">✓</text></view></view></scroll-view></view><view class="field"><text>小主的名字</text><input class="input" value="{{petForm.name}}" maxlength="20" aria-label="兔兔名字，必填" data-path="petForm.name" bindinput="formInput" placeholder="写下真实的小名" /></view><view class="field"><text>品种 / 小小介绍</text><input class="input" value="{{petForm.breed}}" maxlength="40" aria-label="品种或介绍，可选" data-path="petForm.breed" bindinput="formInput" placeholder="不知道也没关系，可以留空" /></view><view class="field"><text>生日</text><picker mode="date" value="{{petForm.birthday}}" end="{{today}}" bindchange="birthdayChange"><view class="input pet-picker">{{petForm.birthday || '还没填写，点这里选择'}}<text>⌄</text></view></picker><button wx:if="{{petForm.birthday}}" class="pet-clear" bindtap="clearBirthday">暂不记录生日</button></view><view class="field"><text>绝育状态</text><picker mode="selector" range="{{neuterOptions}}" value="{{neuterIndex}}" bindchange="neuterChange"><view class="input pet-picker">{{petForm.neutered}}<text>⌄</text></view></picker></view></view>
+  <view wx:if="{{drawerKind === 'weight'}}"><text class="pet-form-hint">给 {{pet.name}} 记一笔，慢慢看着你长大。</text><view class="field"><text>记录日期</text><picker mode="date" value="{{weightForm.date}}" end="{{today}}" bindchange="weightDateChange"><view class="input pet-picker">{{weightForm.date}}<text>⌄</text></view></picker></view><view class="field"><text>体重（kg）</text><input class="input" type="digit" value="{{weightForm.kg}}" aria-label="体重，单位千克，必填" data-path="weightForm.kg" bindinput="formInput" placeholder="例如 1.25" /></view><text wx:if="{{weightForm.existing}}" class="pet-form-hint">这天已有记录，保存会更新当天体重。</text></view>
+  <view wx:if="{{drawerKind === 'reminder'}}"><text class="pet-form-hint">只记录你为 {{pet.name}} 安排的事项。</text><view class="field"><text>提醒事项</text><input class="input" value="{{reminderForm.title}}" maxlength="40" aria-label="提醒事项，必填" data-path="reminderForm.title" bindinput="formInput" placeholder="例如：预约复查" /></view><view class="field"><text>日期</text><picker mode="date" value="{{reminderForm.date}}" bindchange="reminderDateChange"><view class="input pet-picker">{{reminderForm.date}}<text>⌄</text></view></picker></view></view>
+  <view wx:if="{{formError}}" class="feedback" aria-role="alert">{{formError}}</view>
+  <button class="button pink save-btn pet-save" bindtap="saveCurrent">♡ 把这一页收好</button><view class="pet-drawer-space"></view>
+</scroll-view></view></view>
+<bunny-menu />

@@ -1,0 +1,65 @@
+<view wx:if="{{expanded}}" class="fan-mask" bindtap="close"></view>
+
+<view class="dock" wx:if="{{!hideDock}}">
+  <view class="fan {{expanded ? 'expanded' : ''}}">
+    <view class="action a-photo" bindtap="photo" hover-class="action-hover" aria-role="button">
+      <text class="action-icon">♧</text><text class="action-label">拍照片</text>
+    </view>
+    <view class="action a-video" bindtap="video" hover-class="action-hover" aria-role="button">
+      <text class="action-icon">▷</text><text class="action-label">录视频</text>
+    </view>
+    <view class="action a-note" bindtap="note" hover-class="action-hover" aria-role="button">
+      <text class="action-icon">✎</text><text class="action-label">记一笔</text>
+    </view>
+    <view class="action a-summon" bindtap="summon" hover-class="action-hover" aria-role="button">
+      <text class="action-icon">♡</text><text class="action-label">召唤兔兔</text>
+    </view>
+  </view>
+
+  <view
+    class="fab"
+    bindtap="toggle"
+    bindtouchstart="touchStart"
+    bindtouchend="touchEnd"
+    bindtouchcancel="touchEnd"
+    hover-class="fab-hover"
+    aria-role="button"
+    aria-label="兔兔快捷菜单"
+  >
+    <view class="fab-ear e-one"></view>
+    <view class="fab-ear e-two"></view>
+    <text wx:if="{{expanded}}" class="cross">×</text>
+    <bunny-mark wx:else />
+  </view>
+  <text class="dock-caption" wx:if="{{showCaption}}">记下一点可爱</text>
+</view>
+
+<view wx:if="{{burst}}" class="burst">
+  <view class="burst-one"><bunny-mark /></view>
+  <text class="burst-two">♡</text>
+  <text class="burst-three">✧</text>
+  <view class="burst-four"><bunny-mark /></view>
+</view>
+
+<view wx:if="{{directory}}" class="directory-mask" catchtouchmove="stop">
+  <scroll-view scroll-y class="directory-sheet" style="padding-top:{{safeTop}}px">
+    <view class="sheet-grab"></view>
+    <view class="directory-top" bindtouchstart="sheetGrabStart" bindtouchend="sheetGrabEnd">
+      <view>
+        <text class="directory-caption">一本属于我们的小电影</text>
+        <text class="directory-title">今天，翻到哪一页？ ♡</text>
+      </view>
+      <view class="directory-close" bindtap="close" aria-role="button" aria-label="合上目录">×</view>
+    </view>
+    <view class="chapters">
+      <view class="chapter chapter-{{index % 3}} {{currentChapter === item.id ? 'chapter-current' : ''}}" wx:for="{{chapters}}" wx:key="id" data-id="{{item.id}}" bindtap="chapter" hover-class="chapter-pressed" aria-role="button" aria-label="{{item.title}}，{{currentChapter === item.id ? '当前页面' : item.caption}}">
+        <view class="tape"></view>
+        <text class="chapter-no">{{currentChapter === item.id ? '正在阅读 · ' : 'CHAPTER '}}0{{index + 1}}</text>
+        <image src="{{item.photo}}" mode="aspectFill" />
+        <text class="chapter-title">{{item.title}} ↗</text>
+        <text class="chapter-caption">{{item.caption}}</text>
+      </view>
+    </view>
+    <text class="directory-end">不用着急，我们有一整个小日子。 ♡</text>
+  </scroll-view>
+</view>

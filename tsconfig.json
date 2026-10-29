@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "ES2022", "lib": ["ES2022", "DOM", "DOM.Iterable"], "jsx": "react-jsx",
+    "module": "ESNext", "moduleResolution": "Bundler", "strict": true, "noEmit": true,
+    "skipLibCheck": true, "esModuleInterop": true, "allowJs": false, "resolveJsonModule": true
+  },
+  "include": ["src/chat/**/*.ts", "src/chat/**/*.tsx", "src/design/**/*.tsx", "src/pages/**/*.ts", "src/pages/**/*.tsx", "src/patterns/**/*.tsx"]
+}

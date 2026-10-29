@@ -1,0 +1,18 @@
+import type { ContextPack, Session, Settings, RequestHandle, Attachment, Message, FamilySnapshot } from '../types';
+export const SCOPES: { id: string; label: string }[];
+export const SYSTEM_PROMPT: string;
+export function defaults(): Settings;
+export function getSettings(): Settings;
+export function saveSettings(settings: Settings, options: { secret?: string; remember: boolean }): Settings;
+export function getSecret(): string;
+export function clearSecret(): void;
+export function listSessions(): Session[];
+export function newSession(): Session;
+export function getSession(id: string): Session | null;
+export function saveSession(session: Session): Session;
+export function removeSession(id: string): void;
+export function buildContext(options: { state: FamilySnapshot; scopes: Record<string, boolean>; query: string; page: string; platform?: 'web'; includeContacts: boolean; maxChars: number }): ContextPack;
+export function buildMessages(options: { question: string; settings: Settings; context: ContextPack; history?: Message[]; attachment?: Attachment | null }): unknown[];
+export function prepareMessages(options: Parameters<typeof buildMessages>[0]): { messages: unknown[]; historyScopes: string[]; history: { includedTurns: number; omittedTurns: number; shortenedTurns: number; blockedTurns: number } };
+export function validateSettings(settings: Settings, secret: string): string;
+export function requestChat(options: { settings: Settings; secret: string; messages: unknown[]; onDelta?: (text: string) => void }): RequestHandle;

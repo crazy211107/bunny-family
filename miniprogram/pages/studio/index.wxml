@@ -1,0 +1,296 @@
+<page-top />
+<bunny-menu hide-dock="{{true}}" />
+<view class="page studio-page">
+  <view class="page-heading">
+    <view>
+      <view class="page-eyebrow">03 / 把照片做成一页小故事</view>
+      <view class="title">创意工坊</view>
+      <view class="subtitle">模板、贴纸与涂鸦，留下你的手作痕迹。</view>
+    </view>
+    <button class="text-btn" bindtap="upload">＋ 换照片</button>
+  </view>
+
+  <view class="workshop-steps">
+    <text class="step {{ready ? 'done' : ''}}">01 选照片</text>
+    <text class="step-line">⌁</text>
+    <text class="step active">02 加点可爱</text>
+    <text class="step-line">⌁</text>
+    <text class="step">03 收好作品</text>
+  </view>
+
+  <view class="paper-card editor-film">
+    <view class="tape"></view>
+    <view class="preview-top">
+      <view class="preview-copy"><text class="preview-label">作品预览</text><text class="preview-meta">{{templateName}} · {{settings.stickers.length}} 张贴纸 · {{settings.strokes.length}} 笔</text></view>
+      <button class="text-btn" bindtap="reset">↺ 复位</button>
+    </view>
+    <view class="history-bar">
+      <button class="text-btn" bindtap="undo" disabled="{{!canUndo}}" aria-label="撤销上一步编辑">↶ 撤销</button>
+      <text class="step-count">{{steps}} / 30 步</text>
+      <button class="text-btn" bindtap="redo" disabled="{{!canRedo}}" aria-label="重做编辑">↷ 重做</button>
+      <button class="text-btn draft-save" bindtap="saveDraft">▤ 留作草稿</button>
+    </view>
+
+    <view class="canvas-stage {{tool === '涂鸦' ? 'drawing' : ''}}">
+      <canvas
+        type="2d"
+        id="artboard"
+        class="artboard"
+        bindtouchstart="touchStart"
+        catchtouchmove="touchMove"
+        bindtouchend="finishGesture"
+        bindtouchcancel="finishGesture"
+        aria-label="可编辑照片画布，可拖动贴纸或画笔涂鸦"
+      ></canvas>
+    </view>
+    <view class="canvas-note" wx:if="{{!ready}}" aria-role="status">{{error || '正在展开照片…'}}<button wx:if="{{!photos.length}}" class="text-btn" bindtap="upload">＋ 选择第一张照片</button><button wx:elif="{{error}}" class="text-btn" bindtap="loadImages">重新展开照片</button></view>
+    <view class="rail-caption"><text>换一帧回忆</text><text>{{photos.length}} 张可选 · 左右滑动</text></view>
+
+    <scroll-view scroll-x class="photo-rail">
+      <view class="rail-inner">
+        <view
+          wx:for="{{photos}}"
+          wx:key="id"
+          class="rail-item {{item.selected ? 'selected' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="choosePhoto"
+          hover-class="control-pressed"
+          aria-role="button"
+          aria-label="{{item.title}}{{item.selected ? '，当前已选中' : '，点击编辑'}}"
+        >
+          <image src="{{item.src}}" mode="aspectFill" />
+        </view>
+        <view class="rail-item rail-add" bindtap="upload" hover-class="control-pressed" aria-role="button" aria-label="选择新照片">＋</view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view class="paper-card editor-controls">
+    <view class="studio-tabs">
+      <button
+        wx:for="{{tools}}"
+        wx:key="*this"
+        class="studio-tab {{tool === item ? 'selected' : ''}}"
+        data-tool="{{item}}"
+        bindtap="tool"
+        aria-label="{{item}}工具{{tool === item ? '，已选中' : ''}}"
+      >{{item}}</button>
+    </view>
+
+    <view class="tool-body">
+      <block wx:if="{{tool === '模板'}}">
+        <view class="tool-title">给回忆穿件新衣服</view>
+        <view class="muted">八款小心思，每一款都能真的导出。</view>
+        <view class="template-grid">
+          <button
+            wx:for="{{templates}}"
+            wx:key="id"
+            class="template-item {{settings.template === item.id ? 'selected' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="chooseTemplate"
+            aria-label="{{item.name}}模板{{settings.template === item.id ? '，已选中' : ''}}"
+          >
+            <view class="template-art template-{{item.id}}" style="background:{{item.color}}">
+              <image class="template-photo" src="{{chosenSrc}}" mode="aspectFill" />
+              <text class="template-badge" wx:if="{{item.id === 'comic'}}">四格</text>
+            </view>
+            <text class="template-name">{{item.name}}</text>
+          </button>
+        </view>
+
+        <view class="sub-block" wx:if="{{settings.template === 'comic'}}">
+          <view class="tool-subtitle">四格故事，每一格都可以换图</view>
+          <view class="slot-grid">
+            <picker
+              wx:for="{{slots}}"
+              wx:key="index"
+              range="{{slotTitles}}"
+              value="{{item.photoIndex}}"
+              data-slot="{{item.index}}"
+              bindchange="slot"
+            >
+              <view class="slot">
+                <image src="{{item.src}}" mode="aspectFill" />
+                <text>第 {{item.index + 1}} 格 ▾</text>
+              </view>
+            </picker>
+          </view>
+        </view>
+
+        <view class="sub-block" wx:if="{{settings.template === 'exposure'}}">
+          <view class="tool-subtitle">让两帧回忆，轻轻重叠</view>
+          <picker range="{{photoTitles}}" value="{{secondaryIndex}}" bindchange="secondary">
+            <view class="picker-input">{{photoTitles[secondaryIndex]}}<text class="picker-arrow">⌄</text></view>
+          </picker>
+        </view>
+      </block>
+
+      <block wx:elif="{{tool === '贴纸'}}">
+        <view class="tool-title">今天也要兔里兔气</view>
+        <view class="muted">添加后在画布上直接拖，也能用下面的滑杆细调。</view>
+        <view class="sticker-tray">
+          <button class="sticker-chip" data-type="ears" bindtap="sticker">兔耳朵</button>
+          <button class="sticker-chip" data-type="carrot" bindtap="sticker">胡萝卜</button>
+          <button class="sticker-chip" data-type="heart" bindtap="sticker">小爱心</button>
+          <button class="sticker-chip" data-type="star" bindtap="sticker">闪亮星</button>
+        </view>
+        <view class="adjust-block" wx:if="{{currentSticker}}">
+          <view class="field-label">贴纸大小 · {{currentSticker.scale}}</view>
+          <slider
+            class="tone-slider"
+            min="0.5"
+            max="2.5"
+            step="0.05"
+            value="{{currentSticker.scale}}"
+            activeColor="#ce8ba7"
+            backgroundColor="#efdfe6"
+            block-size="22"
+            block-color="#ce8ba7"
+            data-key="scale"
+            bindchange="stickerAdjust"
+            aria-label="贴纸大小"
+          />
+          <view class="field-label">转个方向 · {{currentSticker.rotation}}°</view>
+          <slider
+            class="tone-slider"
+            min="-180"
+            max="180"
+            step="1"
+            value="{{currentSticker.rotation}}"
+            activeColor="#ce8ba7"
+            backgroundColor="#efdfe6"
+            block-size="22"
+            block-color="#ce8ba7"
+            data-key="rotation"
+            bindchange="stickerAdjust"
+            aria-label="贴纸旋转角度"
+          />
+          <button class="button small-action" bindtap="removeSticker">移除贴纸（可以撤销）</button>
+        </view>
+        <view class="sticker-tip" wx:else>点选一张贴纸，就能调整大小与角度。</view>
+      </block>
+
+      <block wx:elif="{{tool === '涂鸦'}}">
+        <view class="tool-title">给照片画一句悄悄话</view>
+        <view class="brush-row">
+          <button
+            wx:for="{{brushes}}"
+            wx:key="id"
+            class="brush-chip {{brush === item.id ? 'selected' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="brush"
+            aria-label="{{item.title}}{{brush === item.id ? '，已选中' : ''}}"
+          >{{item.title}}</button>
+        </view>
+        <view class="color-row">
+          <button
+            wx:for="{{colors}}"
+            wx:key="*this"
+            class="color-dot {{color === item ? 'selected' : ''}}"
+            data-color="{{item}}"
+            bindtap="color"
+            style="background:{{item}}"
+            aria-label="{{colorNames[index]}}画笔{{color === item ? '，已选中' : ''}}"
+          ><text wx:if="{{color === item}}">✓</text></button>
+        </view>
+        <view class="field-label">笔触大小 · {{brushWidth}}</view>
+        <slider
+          class="tone-slider"
+          min="3"
+          max="35"
+          value="{{brushWidth}}"
+          activeColor="#ce8ba7"
+          backgroundColor="#efdfe6"
+          block-size="22"
+          block-color="#ce8ba7"
+          bindchanging="brushWidth"
+          bindchange="brushWidth"
+          aria-label="画笔粗细"
+        />
+        <view class="muted">在照片区域直接画。每一笔都能撤销；马赛克取样原照片，不覆盖文字与贴纸。</view>
+        <button class="button small-action" bindtap="clearInk" disabled="{{!settings.strokes.length}}">清空笔画（可以撤销）</button>
+      </block>
+
+      <block wx:elif="{{tool === '文字'}}">
+        <view class="tool-title">想对这一刻说什么？</view>
+        <view class="field">
+          <view class="field-label">照片批注</view>
+          <input class="input" maxlength="24" value="{{settings.title}}" bindinput="inputTitle" bindblur="titleEnd" aria-label="作品照片批注，最多24字" placeholder="写一句软乎乎的话" />
+          <view class="input-counter">{{settings.title.length}} / 24 字</view>
+        </view>
+        <view class="field">
+          <view class="field-label">字迹</view>
+          <picker range="{{fonts}}" value="{{fontIndex}}" bindchange="font">
+            <view class="picker-input">{{fonts[fontIndex]}}<text class="picker-arrow">⌄</text></view>
+          </picker>
+        </view>
+        <view class="tiny">字迹随设备字体回退，正式上线前需配置授权字体。</view>
+      </block>
+
+      <block wx:elif="{{tool === '调色'}}">
+        <view class="tool-title">把光调成喜欢的样子</view>
+        <view class="tone-row"><text class="field-label">亮一点</text><text class="tone-value">{{settings.brightness}}%</text></view>
+        <slider
+          class="tone-slider"
+          min="50"
+          max="150"
+          value="{{settings.brightness}}"
+          activeColor="#ce8ba7"
+          backgroundColor="#efdfe6"
+          block-size="22"
+          block-color="#ce8ba7"
+          data-key="brightness"
+          bindchange="adjust"
+          aria-label="亮度"
+        />
+        <view class="tone-row"><text class="field-label">对比度</text><text class="tone-value">{{settings.contrast}}%</text></view>
+        <slider
+          class="tone-slider"
+          min="50"
+          max="150"
+          value="{{settings.contrast}}"
+          activeColor="#ce8ba7"
+          backgroundColor="#efdfe6"
+          block-size="22"
+          block-color="#ce8ba7"
+          data-key="contrast"
+          bindchange="adjust"
+          aria-label="对比度"
+        />
+        <view class="tone-row"><text class="field-label">色彩浓度</text><text class="tone-value">{{settings.saturation}}%</text></view>
+        <slider
+          class="tone-slider"
+          min="0"
+          max="200"
+          value="{{settings.saturation}}"
+          activeColor="#ce8ba7"
+          backgroundColor="#efdfe6"
+          block-size="22"
+          block-color="#ce8ba7"
+          data-key="saturation"
+          bindchange="adjust"
+          aria-label="色彩浓度"
+        />
+        <button class="button small-action" bindtap="cream">☀ 一键奶油光</button>
+        <view class="tiny">松手后画布才重算像素，拖动时不卡手。</view>
+      </block>
+    </view>
+
+    <view class="editor-save">
+      <view class="feedback" wx:if="{{error}}" aria-role="alert">{{error}}</view>
+      <button class="save-btn" loading="{{busy}}" disabled="{{busy || !ready}}" data-kind="album" bindtap="saveWork">{{busy ? '正在收好…' : '♡ 存进回忆相册'}}</button>
+      <button class="button png-action" disabled="{{busy || !ready}}" data-kind="device" bindtap="saveWork">▤ 导出 PNG · 存手机相册</button>
+      <view class="tiny">预览与导出共用同一张画布，编辑选框不会导出。</view>
+    </view>
+  </view>
+
+  <view class="section-title">还没写完的小心思 <text class="draft-count">{{drafts.length}}</text></view>
+  <view class="draft-row paper-card" wx:for="{{drafts}}" wx:key="id">
+    <view class="draft-open" data-id="{{item.id}}" bindtap="restore" hover-class="control-pressed" aria-role="button" aria-label="打开草稿：{{item.name}}">
+      <text class="draft-name">{{item.name}}</text>
+      <text class="tiny">{{item.when}} 存下</text>
+    </view>
+    <button class="draft-remove" data-id="{{item.id}}" catchtap="removeDraft" aria-label="删除草稿：{{item.name}}">×</button>
+  </view>
+  <empty-state wx:if="{{!drafts.length}}" text="随时存一份草稿，下次接着把可爱写完。" />
+</view>

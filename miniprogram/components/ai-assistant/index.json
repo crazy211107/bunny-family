@@ -1,0 +1,5 @@
+{
+  "component": true,
+  "styleIsolation": "isolated",
+  "usingComponents": { "bunny-mark": "/components/bunny-mark/index" }
+}

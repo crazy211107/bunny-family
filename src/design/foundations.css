@@ -1,0 +1,100 @@
+/* Shared foundations; pages may change density, never the meaning of a color. */
+.product-app {
+  --background: #fcfcfa;
+  --surface: #fff;
+  --surface-muted: #f3f5ef;
+  --foreground: #263c32;
+  --secondary: #68756b;
+  --line: #e0e5dd;
+  --accent: #386449;
+  --on-accent: #fff;
+  --warm: #e9e3d6;
+  --font-ui: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-display: "STKaiti", "KaiTi", Georgia, serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --radius-control: 6px;
+  --radius-container: 8px;
+  --radius-feature: 18px;
+  --chat-bg: var(--background);
+  --chat-surface: var(--surface);
+  --chat-fg: var(--foreground);
+  --chat-muted: var(--secondary);
+  --chat-border: var(--line);
+  --chat-accent: var(--accent);
+  --chat-on-accent: var(--on-accent);
+  --chat-hover: var(--surface-muted);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.65;
+  min-height: 100dvh;
+}
+.product-app .chat-button {
+  border-radius: var(--radius-control);
+  font-size: 13px;
+}
+.product-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-container);
+  background: var(--surface);
+}
+.product-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-size: 10px;
+  line-height: 1.6;
+  white-space: nowrap;
+  background: var(--surface-muted);
+  color: var(--secondary);
+}
+.product-badge-success {
+  background: #edf4e9;
+  color: #386449;
+  border-color: #d5e2ce;
+}
+.product-badge-warning {
+  background: #f9f3df;
+  color: #7b622d;
+  border-color: #e9dfbd;
+}
+.product-app input,
+.product-app select {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  padding: 7px 10px;
+  background: var(--surface);
+  font-size: 13px;
+  min-height: 36px;
+}
+.product-app :is(button, a, input, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.product-app :is(button, a) {
+  transition:
+    background-color 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.product-app a {
+  color: inherit;
+}
+.product-app p {
+  color: var(--secondary);
+}
+@media (prefers-reduced-motion: reduce) {
+  .product-app * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

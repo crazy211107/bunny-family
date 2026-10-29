@@ -1,0 +1,255 @@
+/* 组件层：纸卡、按钮、标签、列表行、表单、抽屉、胶带
+   页面里出现两次以上的形态才进这里 */
+
+/* ---------- 纸卡片 ---------- */
+.paper-card {
+  position: relative;
+  padding: 22rpx 24rpx;
+  margin-bottom: 18rpx;
+  background: #fffcf5;
+  border: 1rpx solid #e2d1da;
+  border-radius: 36rpx 52rpx 30rpx 44rpx;
+  box-shadow: inset 0 1rpx 0 #ffffff, 5rpx 8rpx 0 #6b5b7309, 0 12rpx 26rpx #6b5b730a;
+}
+
+/* ---------- 主按钮 ---------- */
+.button,
+.save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  padding: 18rpx 32rpx;
+  font-size: 27rpx;
+  line-height: 1.5;
+  background: #fffbf3;
+  border: 1rpx solid #cdb7c5;
+  border-radius: 36rpx 46rpx 32rpx 42rpx;
+  box-shadow: 0 5rpx 0 #6b5b7312;
+  transition: transform .12s ease, background .12s ease;
+}
+.button:active,
+.save-btn:active { transform: scale(.97); }
+.pink { background: #ffd9e8; border-color: #cf9db2; }
+.mint { background: #c9e7d3; border-color: #a8c2ae; }
+.yellow { background: #ffe9a8; border-color: #dcc583; }
+.save-btn { width: 100%; margin: 32rpx 0 14rpx; }
+
+/* 次要文字按钮：可点，但不抢视线 */
+.text-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  padding: 6rpx 16rpx;
+  font-size: 24rpx;
+  color: #875873;
+}
+
+/* ---------- 标签 / 筛选胶囊 ---------- */
+.tag {
+  display: inline-block;
+  padding: 7rpx 16rpx;
+  margin: 5rpx 6rpx 5rpx 0;
+  font-size: 22rpx;
+  line-height: 1.5;
+  background: #ffe9a8;
+  border-radius: 14rpx 19rpx 13rpx 17rpx;
+  transform: rotate(-2deg);
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 80rpx;
+  padding: 0 24rpx;
+  font-size: 24rpx;
+  color: #806579;
+  background: #fffaf2;
+  border: 1rpx solid #dcc7d2;
+  border-radius: 30rpx 36rpx 28rpx 34rpx;
+}
+.chip.active {
+  color: #6b5b73;
+  background: #ffd9e8;
+  border-color: #c18aa5;
+  box-shadow: 0 3rpx 0 #c18aa522;
+}
+
+/* ---------- 空态 ---------- */
+.empty {
+  padding: 64rpx 28rpx;
+  font-size: 26rpx;
+  line-height: 2;
+  color: #806c7b;
+  text-align: center;
+}
+.empty-symbol { margin-bottom: 16rpx; font-size: 64rpx; }
+
+/* ---------- 表单 ---------- */
+.field { margin: 20rpx 0; font-size: 26rpx; }
+.field-label {
+  display: block;
+  margin-bottom: 14rpx;
+  font-size: 24rpx;
+  color: #806579;
+}
+.input,
+.textarea,
+.picker-input {
+  width: 100%;
+  min-height: 88rpx;
+  padding: 20rpx 26rpx;
+  font-size: 28rpx;
+  background: #fffcf5;
+  border: 1rpx solid #dcc7d2;
+  border-radius: 28rpx 36rpx 25rpx 32rpx;
+}
+.textarea { height: 220rpx; line-height: 1.9; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20rpx; }
+.pill-options { display: flex; flex-wrap: wrap; gap: 14rpx; }
+.pill {
+  padding: 14rpx 24rpx;
+  font-size: 24rpx;
+  background: #fffaf2;
+  border: 1rpx solid #d6c1cd;
+  border-radius: 26rpx 32rpx 24rpx 30rpx;
+}
+.pill.active {
+  background: #ffd9e8;
+  border-color: #c18aa5;
+  transform: rotate(-3deg);
+}
+.photo-avatar {
+  width: 100rpx;
+  height: 108rpx;
+  object-fit: cover;
+  border: 5rpx solid #fff9f0;
+  border-radius: 45% 55% 43% 52%;
+}
+.feedback {
+  padding: 20rpx 26rpx;
+  margin: 18rpx 0;
+  font-size: 24rpx;
+  line-height: 1.8;
+  color: #b56f84;
+  background: #ffe4ea;
+  border-radius: 24rpx;
+}
+
+/* ---------- 抽屉 ---------- */
+.drawer-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  justify-content: flex-end;
+  background: #6b5b7355;
+}
+.drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  padding-top: env(safe-area-inset-top);
+  overflow: hidden;
+  background: #fff9f0;
+  animation: drawer-in .25s ease;
+}
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 30rpx 16rpx;
+  font-size: 36rpx;
+  background: #fff9f0;
+  border-bottom: 1rpx dashed #dcc7d2;
+}
+.drawer-body {
+  height: calc(100% - 96rpx);
+  padding: 24rpx 34rpx calc(80rpx + env(safe-area-inset-bottom));
+}
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 76rpx;
+  height: 76rpx;
+  font-size: 40rpx;
+  line-height: 1;
+  background: #f8e8ed;
+  border-radius: 50%;
+}
+
+/* ---------- 胶带 ---------- */
+.tape {
+  position: absolute;
+  top: -20rpx;
+  left: 38%;
+  z-index: 2;
+  width: 160rpx;
+  height: 40rpx;
+  background: #f8c6d6c9;
+  background-image: radial-gradient(#fff9f0 3rpx, transparent 3rpx);
+  background-size: 20rpx 18rpx;
+  transform: rotate(-5deg);
+}
+
+@keyframes drawer-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  view, button { animation: none !important; transition: none !important; }
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(14rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- 列表行：参考 Vant Cell 的 title / label / value / arrow 结构 ---------- */
+.cell {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  min-height: 88rpx;           /* 44px 触控下限 */
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f1e5eb;
+}
+.cell:last-child { border-bottom: 0; }
+.cell-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4rpx; }
+.cell-title {
+  font-size: 26rpx;
+  line-height: 1.5;
+  color: #6b5b73;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cell-label { font-size: 22rpx; line-height: 1.6; color: #806c7b; }
+.cell-value { flex: 0 0 auto; font-size: 24rpx; color: #806c7b; }
+.cell-arrow { flex: 0 0 auto; font-size: 28rpx; line-height: 1; color: #cdb6c0; }
+
+/* ---------- 统一卡片头 ---------- */
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12rpx;
+  margin-bottom: 4rpx;
+}
+.card-title { font-size: 30rpx; font-weight: 500; letter-spacing: 2rpx; color: #6b5b73; }
+.card-hint { font-size: 22rpx; color: #806c7b; }
+
+/* 统一按压反馈；只改变透明度与变换，避免列表抖动。 */
+.press { opacity: .82; transform: scale(.98); }
+.pill { min-height: 80rpx; display: inline-flex; align-items: center; justify-content: center; }
+.feedback { color: #8f385b; border-left: 5rpx solid #bd6c8f; }
+.input:focus,.textarea:focus { border-color: #99718c; }
+.cell-body,.form-grid>view { min-width: 0; }
+.drawer { display: flex; flex-direction: column; }
+.drawer-head { flex-shrink: 0; }
+.drawer-body { flex: 1; height: 0; min-height: 0; }

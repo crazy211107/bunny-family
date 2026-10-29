@@ -1,0 +1,7 @@
+/* 样式入口：按职责拆分，改样式请直接去对应文件
+   base        基础层（页面、字号、排版工具）
+   components  组件层（纸卡、按钮、单元格、表单、抽屉）
+   responsive  适配层（窄屏/宽屏、减少动效） */
+@import "styles/base.wxss";
+@import "styles/components.wxss";
+@import "styles/responsive.wxss";

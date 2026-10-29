@@ -1,0 +1,27 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/pets/index",
+    "pages/family/index",
+    "pages/diary/index",
+    "pages/album/index",
+    "pages/studio/index",
+    "pages/video/index",
+    "pages/care/index",
+    "pages/insights/index"
+  ],
+  "window": {
+    "navigationStyle": "custom",
+    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#FFF9F0",
+    "backgroundColor": "#FFF9F0",
+    "backgroundTextStyle": "dark"
+  },
+  "usingComponents": {
+    "page-top": "/components/page-top/index",
+    "bunny-menu": "/components/bunny-menu/index",
+    "bunny-mark": "/components/bunny-mark/index"
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

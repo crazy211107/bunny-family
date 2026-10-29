@@ -1,0 +1,32 @@
+<page-top />
+<view class="page family-page">
+  <view class="family-heading"><text class="page-eyebrow">02 / 一家人的小小剧组</text><text class="title">我们家的出场名单 ♡</text><text class="subtitle">陪在一起的人，都有一个专属位置。</text></view>
+  <view class="family-opening"><text class="family-opening-mark">♡</text><view><text class="family-opening-title">一家人，就是最好的剧组。</text><text>本机家庭册 · {{members.length}} 位家人 · {{birthdayCount}} 个生日</text></view><text class="family-opening-stamp">HOME</text></view>
+  <button class="button pink family-add" bindtap="openEditor">＋ 请一位家人入镜</button>
+
+  <view wx:if="{{members.length}}" class="family-timeline">
+    <view wx:for="{{members}}" wx:key="id" class="family-member-wrap">
+      <view class="family-timeline-dot"></view>
+      <view class="family-member paper-card member-{{item.color}}">
+        <view class="family-member-tape"></view><text class="family-number">CAST {{item.number}}</text>
+        <view class="family-member-top"><view class="family-avatar"><image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" /><text wx:else="">{{item.initial}}</text></view><view class="family-name"><text>{{item.name}} ♡</text><text class="family-role">{{item.role}}</text></view><button class="family-edit" data-id="{{item.id}}" bindtap="openEditor" aria-label="编辑{{item.name}}">✎</button></view>
+        <view class="family-birthday {{item.birthdayToday ? 'is-today' : ''}}"><text>☀ {{item.birthdayCaption}}</text><text wx:if="{{item.birthday}}">{{item.birthday}}</text></view>
+        <view wx:if="{{item.relationCaption}}" class="family-relation">✉ {{item.relationCaption}}</view>
+        <view class="family-member-footer"><view class="family-order"><button data-id="{{item.id}}" data-delta="-1" disabled="{{!item.canUp}}" bindtap="moveMember" aria-label="将{{item.name}}向前排序">↑ 向前</button><button data-id="{{item.id}}" data-delta="1" disabled="{{!item.canDown}}" bindtap="moveMember" aria-label="将{{item.name}}向后排序">↓ 向后</button></view><button class="family-remove" data-id="{{item.id}}" bindtap="deleteMember" aria-label="删除成员{{item.name}}">收起资料</button></view>
+      </view>
+    </view>
+  </view>
+  <view wx:else="" class="empty family-empty"><text class="family-empty-bunny">ᕱ⑅ᕱ</text><text>出场名单还空着，把第一个家人请进来吧。</text><button class="button mint" bindtap="openEditor">写下第一个名字</button></view>
+  <view class="family-footnote"><text>ᕱ⑅ᕱ</text><text>本页资料仅留在当前设备，尚未连接多人共享。</text></view>
+</view>
+
+<view wx:if="{{drawerVisible}}" class="drawer-mask family-drawer-mask" bindtap="closeDrawer" catchtouchmove="stopTap"><view class="drawer family-drawer" style="padding-top:{{safeTop}}px" catchtap="stopTap"><view class="drawer-head"><view><text class="family-drawer-kicker">我们故事里的每一个你</text><text class="family-drawer-title">{{drawerTitle}}</text></view><button class="close" bindtap="closeDrawer" aria-label="关闭成员编辑抽屉">×</button></view><scroll-view class="family-drawer-body" scroll-y="{{true}}">
+  <view class="family-avatar-editor"><button class="family-form-avatar" bindtap="chooseAvatar" disabled="{{avatarBusy}}" aria-label="选择成员头像"><image wx:if="{{form.avatar}}" src="{{form.avatar}}" mode="aspectFill" /><view wx:else=""><text>♡</text><text>选张头像</text></view><text class="avatar-edit-mark">＋</text></button><text>{{avatarBusy ? '正在把头像收进本机…' : '点一下，换一张喜欢的头像'}}</text><button wx:if="{{form.avatar}}" class="family-clear-avatar" bindtap="clearAvatar" disabled="{{avatarBusy}}">使用名字头像</button></view>
+  <view class="field"><text>家人的名字 <text class="required-mark">必填</text></text><input class="input" value="{{form.name}}" maxlength="20" data-field="name" bindinput="formInput" aria-label="家人的名字，必填" placeholder="怎么称呼这位家人？" /></view>
+  <view class="field"><text>在这个家的小角色</text><input class="input" value="{{form.role}}" maxlength="30" aria-label="在家庭中的角色，可选" data-field="role" bindinput="formInput" placeholder="例如：喂兔专员、快乐铲屎官" /></view>
+  <view class="field"><text>生日（可选）</text><picker mode="date" value="{{form.birthday}}" end="{{today}}" bindchange="birthdayChange"><view class="input family-picker">{{form.birthday || '先留空也没关系'}}<text>⌄</text></view></picker><button wx:if="{{form.birthday}}" class="family-clear" bindtap="clearBirthday">暂不记录生日</button></view>
+  <view class="family-relation-form"><text class="family-relation-form-title">给家人的关系贴一张便签</text><view class="field"><text>与哪位家人有关</text><picker mode="selector" range="{{relationOptions}}" range-key="name" value="{{relationIndex}}" bindchange="relationChange"><view class="input family-picker">{{relationName}}<text>⌄</text></view></picker></view><view class="field"><text>关系批注</text><input class="input" value="{{form.relation}}" maxlength="50" aria-label="关系批注，可选" data-field="relation" bindinput="formInput" placeholder="例如：一起照顾兔兔的搭档" /></view><text class="family-form-note">批注由你填写，用选择和文字把关系说清楚。</text></view>
+  <view wx:if="{{formError}}" class="feedback" aria-role="alert">{{formError}}</view>
+  <button class="button pink save-btn family-save" disabled="{{avatarBusy}}" bindtap="saveMember">♡ 把这位家人收好</button><view class="family-drawer-space"></view>
+</scroll-view></view></view>
+<bunny-menu />

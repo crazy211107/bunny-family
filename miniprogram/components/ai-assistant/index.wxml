@@ -1,0 +1,87 @@
+<button wx:if="{{!opened}}" class="ai-float {{collapsed ? 'ai-float-collapsed' : ''}}" style="left:{{floatX}}px;top:{{floatY}}px;width:{{floatWidth}}px;height:{{floatSize}}px" bindtouchstart="dragStart" catchtouchmove="dragMove" bindtouchend="dragEnd" bindtouchcancel="dragEnd" bindtap="openChat" hover-class="ai-pressed" aria-label="打开豆伴 AI，可拖动贴边">
+  <view class="ai-float-logo"><bunny-mark /></view><view wx:if="{{!collapsed}}" class="ai-float-words"><text>豆伴</text><text>聊聊小日子</text></view><view class="ai-float-dot"></view>
+</button>
+
+<view wx:if="{{opened}}" class="ai-overlay {{keyboardHeight ? 'ai-keyboard' : ''}}" style="height:{{panelHeight - keyboardHeight}}px;padding-top:{{safeTop}}px">
+  <view class="ai-header" catchtouchmove="stopTap">
+    <button class="ai-back" bindtap="navigateBack" hover-class="ai-pressed" aria-label="返回"><image src="/assets/ai-arrow-left.svg" mode="aspectFit" /></button>
+    <view class="ai-brand"><view class="ai-brand-icon"><bunny-mark small /></view><view><text class="ai-brand-name">{{screen === 'history' ? '会话列表' : screen === 'settings' ? '连接与资料' : screen === 'context' ? '资料预览' : '豆伴'}}</text><text class="ai-brand-note">{{screen === 'chat' ? title : screen === 'history' ? '返回小窝' : '保留当前对话'}}</text></view></view>
+    <button wx:if="{{screen === 'chat' || screen === 'history'}}" id="ai-new-chat" class="ai-new-chat" catchtap="newChat" hover-class="ai-pressed" aria-label="新对话">＋ 新对话</button>
+    <button wx:if="{{screen === 'chat'}}" id="ai-more" class="ai-more" catchtap="toggleMenu" hover-class="ai-pressed" aria-label="更多对话选项" aria-expanded="{{menuOpen}}">···</button>
+    <button wx:else class="ai-close" bindtap="closeChat" hover-class="ai-pressed" aria-label="收起豆伴">−</button>
+    <view wx:if="{{screen === 'chat' && menuOpen}}" class="ai-menu" aria-label="对话选项">
+      <button class="ai-menu-item" bindtap="openHistory" hover-class="ai-pressed">会话列表<text>›</text></button>
+      <button class="ai-menu-item" bindtap="previewContext" hover-class="ai-pressed">本次资料与上下文<text>›</text></button>
+      <button class="ai-menu-item" bindtap="openSettings" hover-class="ai-pressed">连接与模型<text>›</text></button>
+      <button class="ai-menu-item" bindtap="closeChat" hover-class="ai-pressed">收起豆伴<text>−</text></button>
+    </view>
+  </view>
+  <view wx:if="{{screen !== 'chat' && error}}" class="ai-feedback" aria-role="alert">{{error}}</view>
+  <view wx:if="{{screen !== 'chat' && notice && !error}}" class="ai-notice" aria-role="status">{{notice}}</view>
+
+  <block wx:if="{{screen === 'chat'}}">
+    <view class="ai-conversation">
+    <scroll-view id="ai-message-scroll" class="ai-messages" scroll-y scroll-into-view="{{scrollTarget}}" scroll-with-animation="{{false}}" enhanced show-scrollbar="{{false}}" bindtap="closeMenu" bindtouchstart="messageTouch" bindtouchmove="messageMove" bindscroll="messageScroll" bindscrolltolower="resumeScroll">
+      <button wx:if="{{hiddenMessages}}" class="ai-earlier" bindtap="loadEarlier" hover-class="ai-pressed">加载更早的消息 · {{hiddenMessages}} 条</button>
+      <view wx:if="{{!messages.length}}" class="ai-welcome ai-welcome-simple">
+        <view class="ai-empty-mark"><bunny-mark /></view>
+        <text class="ai-empty-title">今天，想聊点什么？</text>
+        <text class="ai-empty-copy">关于豆米和豆糕，一起慢慢理清。</text>
+        <block wx:if="{{hasSecret}}"><button class="ai-prompt" wx:for="{{prompts}}" wx:key="*this" data-text="{{item}}" bindtap="prompt" hover-class="ai-pressed"><text>{{item}}</text><text>↗</text></button></block>
+        <view wx:else class="ai-connect-guide"><text>连接你的 AI 服务后，就可以开始聊天。</text><button class="ai-button ai-button-mint" bindtap="openSettings" hover-class="ai-pressed">连接豆伴</button></view>
+      </view>
+      <view wx:for="{{messages}}" wx:key="id" id="ai-message-{{item.id}}" class="ai-message ai-message-{{item.role}}">
+        <view class="ai-message-meta"><view wx:if="{{item.role === 'assistant'}}" class="ai-answer-mark"><view class="ai-answer-mark-inner"><bunny-mark /></view></view><text class="ai-message-author">{{item.role === 'user' ? '我' : '豆伴'}}</text><text class="ai-message-time">{{item.time}}</text><button wx:if="{{item.role === 'user'}}" class="ai-user-copy" data-id="{{item.id}}" bindtap="copyMessage" hover-class="ai-pressed" aria-label="复制我的消息"><image src="/assets/ai-copy.svg" mode="aspectFit" /></button></view>
+        <view class="ai-bubble">
+          <text wx:if="{{item.role === 'user'}}" class="ai-user-text" selectable>{{item.content}}</text>
+          <block wx:else>
+            <block wx:for="{{item.blocks}}" wx:for-item="block" wx:key="id"><view wx:if="{{block.type === 'code'}}" class="ai-code-block"><view class="ai-code-heading"><text>代码</text><button class="ai-code-copy" data-message="{{item.id}}" data-index="{{block.id}}" bindtap="copyCode" aria-label="复制代码">复制代码</button></view><text class="ai-md ai-md-code" selectable>{{block.text}}</text></view><text wx:else class="ai-md ai-md-{{block.type}}" selectable><text wx:for="{{block.runs}}" wx:for-item="run" wx:key="id" class="ai-inline-{{run.kind}}">{{run.text}}</text></text></block>
+            <view wx:if="{{item.status === 'streaming'}}" class="ai-streaming"><text class="ai-stream-dot"></text><text>{{item.hasContent ? '正在回复…' : '正在等待回答…'}}</text></view>
+            <view wx:if="{{item.status === 'aborted'}}" class="ai-message-status">已停止 · {{item.hasContent ? '以上是已收到的部分回答' : '尚未收到回答文字'}}</view>
+            <view wx:if="{{item.status === 'error'}}" class="ai-message-status ai-message-error">这次回答未完成 · 已收到的文字仍保留</view>
+          </block>
+        </view>
+        <view class="ai-message-actions" wx:if="{{item.role === 'assistant' && (item.hasContent || item.retryable || item.imageRetry)}}"><button wx:if="{{item.hasContent}}" class="ai-message-copy" data-id="{{item.id}}" bindtap="copyMessage" hover-class="ai-pressed" aria-label="{{item.role === 'user' ? '复制我的消息' : '复制豆伴的回答'}}"><image src="/assets/ai-copy.svg" mode="aspectFit" /><text>复制</text></button><button wx:if="{{item.retryable}}" class="ai-message-copy" bindtap="retry" hover-class="ai-pressed" aria-label="重新生成这次回答">↻ 重试</button><text wx:if="{{item.imageRetry}}" class="ai-image-retry">重试需重新附图。</text></view>
+      </view>
+      <button wx:if="{{newerMessages}}" class="ai-earlier" bindtap="latest">还有 {{newerMessages}} 条较新消息 · 返回最新</button>
+      <view id="ai-bottom-a" class="ai-scroll-end"></view><view id="ai-bottom-b" class="ai-scroll-end"></view>
+    </scroll-view>
+    <button wx:if="{{showLatest}}" class="ai-latest" bindtap="latest" hover-class="ai-pressed">回到最新 ↓</button>
+    </view>
+    <view wx:if="{{error}}" class="ai-feedback" aria-role="alert">{{error}}</view>
+    <view wx:if="{{notice && !error}}" class="ai-notice" aria-role="status">{{notice}}</view>
+    <view class="ai-composer" bindtap="closeMenu" catchtouchmove="stopTap">
+      <view wx:if="{{attachment}}" class="ai-attachment"><image src="{{attachment.preview}}" mode="aspectFill" /><view><text>{{attachment.name}}</text><text>仅本次发送 · 不存入对话历史</text></view><view class="ai-icon-action" bindtap="removeImage" aria-role="button" aria-label="移除附图">×</view></view>
+      <view class="ai-compose-card">
+        <textarea class="ai-question" value="{{question}}" bindinput="inputQuestion" bindconfirm="submit" bindblur="inputBlur" focus="{{inputFocused}}" maxlength="3000" auto-height adjust-position="{{false}}" show-confirm-bar="{{false}}" confirm-type="send" placeholder="和豆伴说说…" placeholder-class="ai-placeholder" aria-label="向豆伴 AI 提问，最多3000字" />
+        <view class="ai-compose-row"><view class="ai-input-tools"><button wx:if="{{settings.visionEnabled}}" class="ai-attach-button" bindtap="chooseImage" disabled="{{running || testing || choosingImage}}" hover-class="ai-pressed" aria-label="添加一张照片">{{choosingImage ? '…' : '＋'}}</button></view><button wx:if="{{running}}" class="ai-send ai-stop" bindtap="stop" hover-class="ai-pressed" aria-label="停止回答"><view class="ai-stop-square"></view></button><button wx:else class="ai-send" bindtap="submit" disabled="{{!canSend || testing || choosingImage}}" hover-class="ai-pressed" aria-label="发送问题及选中的家庭资料"><image src="/assets/ai-send.svg" mode="aspectFit" /></button></view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:if="{{screen === 'history'}}">
+    <view class="ai-subbar"><text>只保存在这台设备 · 当前会话已标记</text></view>
+    <scroll-view class="ai-subscroll" scroll-y><view wx:if="{{!sessions.length}}" class="ai-empty"><text>▤</text><text>信箱还空着</text><text>开启“保留本机历史”后，对话才会收进这里。</text><text>点右上角“新对话”写下第一句。</text></view><view wx:for="{{sessions}}" wx:key="id" class="ai-history-row {{item.current ? 'ai-history-current' : ''}}"><view class="ai-history-open" data-id="{{item.id}}" bindtap="openSession" hover-class="ai-pressed" aria-role="button" aria-label="打开对话{{item.title}}"><text>{{item.title}}</text><text>{{item.when}}{{item.current ? ' · 当前对话' : ''}}</text></view><view class="ai-icon-action" data-id="{{item.id}}" bindtap="deleteSession" aria-role="button" aria-label="删除对话{{item.title}}">×</view></view><view wx:if="{{error}}" class="ai-feedback">{{error}}</view></scroll-view>
+  </block>
+
+  <block wx:if="{{screen === 'context'}}">
+    <view class="ai-subbar"><button class="ai-text-action" bindtap="backPreview">‹ 返回{{returnScreen === 'settings' ? '设置' : '对话'}}</button><text>{{previewChars}} 字符 · 即时读取</text></view>
+    <scroll-view class="ai-subscroll" scroll-y><view class="ai-info-paper"><text class="ai-section-title">这次资料会发到哪里？</text><text class="ai-domain">{{previewDestination}}</text><text class="ai-help">每次发送都会重新读取本机记录；本页仅预览，尚未发出请求。{{previewVision ? '当前还附有一张你主动选择的图片。' : '未附图时仅发送照片元信息，不代表模型看过图片。'}}</text></view><view class="ai-history-preview"><button class="ai-disclosure" data-field="previewHistoryOpen" bindtap="togglePreview" aria-expanded="{{previewHistoryOpen}}">一起带上的会话文字<text>{{previewHistoryOpen ? '收起 −' : '展开 ＋'}}</text></button><text class="ai-help">{{previewHistoryNote}}</text><view wx:if="{{previewHistoryOpen}}"><view wx:for="{{previewHistory}}" wx:key="id" class="ai-history-excerpt"><text class="ai-history-speaker">{{item.role === 'user' ? '我' : '豆伴'}}</text><text selectable>{{item.content}}</text></view></view></view><button class="ai-disclosure" data-field="previewDataOpen" bindtap="togglePreview" aria-expanded="{{previewDataOpen}}">本轮家庭资料 · {{previewChars}} 字符<text>{{previewDataOpen ? '收起 −' : '展开 ＋'}}</text></button><view wx:if="{{previewDataOpen}}"><view class="ai-preview-sources"><view wx:for="{{previewSources}}" wx:key="id" class="ai-preview-source {{item.included ? 'ai-preview-included' : ''}}"><text>{{item.included ? '✓' : '○'}} {{item.label}}</text><text>{{item.included}} / {{item.count}} 条已纳入</text></view></view><view class="ai-warning" wx:if="{{previewTruncated}}">资料已按上下文预算截断，以下就是本次构建的实际内容。</view><text class="ai-context-text" selectable>{{previewText}}</text></view><view class="ai-help">密钥不会出现在资料正文或对话历史中。修改范围请返回设置。</view></scroll-view>
+  </block>
+
+  <block wx:if="{{screen === 'settings'}}">
+    <view class="ai-subbar"><button class="ai-text-action" bindtap="backChat">‹ 暂不保存</button><text>连接与资料由你决定</text></view>
+    <scroll-view class="ai-subscroll" scroll-y>
+      <view class="ai-info-paper"><text class="ai-section-title">把豆伴接到你的 AI 服务</text><text class="ai-help">配置只留在本机。发送会调用你指定的服务，可能产生服务商费用；家庭资料仅按勾选范围发送。没有密钥时，家庭功能仍可正常使用。</text></view>
+      <view class="ai-setting-card"><text class="ai-section-title">01 / 连接方式</text><view class="ai-modes"><view class="ai-mode {{form.mode === 'direct' ? 'ai-selected' : ''}}" data-mode="direct" bindtap="changeMode" aria-role="button" aria-label="直连 DeepSeek 或兼容API{{form.mode === 'direct' ? '，已选中' : ''}}">{{form.mode === 'direct' ? '✓ ' : ''}}直连 / 兼容 API</view><view class="ai-mode {{form.mode === 'relay' ? 'ai-selected' : ''}}" data-mode="relay" bindtap="changeMode" aria-role="button" aria-label="自有中转{{form.mode === 'relay' ? '，已选中' : ''}}">{{form.mode === 'relay' ? '✓ ' : ''}}自有中转</view></view><text class="ai-help">{{form.mode === 'relay' ? '中转服务地址请填写到 /v1；访问令牌只发给该域名。' : 'DeepSeek 默认地址 https://api.deepseek.com；兼容服务按其文档填写 base URL。'}}微信真机需要将服务域名配置为合法 request 域名。</text>
+        <view class="ai-field"><text>API 服务地址</text><input class="ai-input" value="{{form.baseUrl}}" data-field="baseUrl" bindinput="formInput" maxlength="300" placeholder="https://api.deepseek.com" aria-label="API服务基础地址" /></view>
+        <view class="ai-field"><text>模型名称</text><input class="ai-input" value="{{form.model}}" data-field="model" bindinput="formInput" maxlength="120" placeholder="deepseek-flash" aria-label="模型名称" /></view>
+        <view class="ai-field"><text>{{form.mode === 'relay' ? '访问令牌' : 'API 密钥'}} <text class="ai-field-hint">{{hasSecret ? '已配置，留空沿用' : '尚未配置'}}</text></text><view class="ai-secret-row"><input class="ai-input" value="{{secretInput}}" password="{{!showSecret}}" bindinput="secretInput" maxlength="1000" placeholder="{{hasSecret ? '更新密钥时再输入' : '只在本机输入你的密钥'}}" aria-label="{{form.mode === 'relay' ? '中转访问令牌' : 'API密钥'}}" /><view class="ai-secret-toggle" bindtap="showSecret" aria-role="button" aria-label="{{showSecret ? '隐藏密钥' : '显示密钥'}}">{{showSecret ? '隐藏' : '显示'}}</view></view></view>
+        <view class="ai-switch-row"><view><text>记住密钥</text><text>开启后以本机存储保存，当前设备可访问；默认仅本次运行使用。</text></view><switch checked="{{form.rememberKey}}" color="#98718a" data-field="rememberKey" bindchange="formSwitch" aria-label="记住密钥到本机存储" /></view><view class="ai-key-actions"><view class="ai-text-action" bindtap="clearSecret" aria-role="button">清除已保存密钥</view><view class="ai-text-action" bindtap="testConnection" aria-role="button">{{testing ? '正在测试…' : '测试连接（会请求 API）'}}</view></view><view wx:if="{{testing}}" class="ai-text-action" bindtap="stop" aria-role="button">停止连接测试</view>
+      </view>
+      <view class="ai-setting-card"><view class="ai-section-row"><text class="ai-section-title">02 / 可参考的家庭资料</text><view class="ai-text-action" bindtap="previewContext" aria-role="button">发送预览 ↗</view></view><text class="ai-help">只选需要的范围；草稿默认关闭。照片、视频默认仅提供本机元信息，不自动上传原文件。</text><view class="ai-scope-grid"><view wx:for="{{scopeRows}}" wx:key="id" class="ai-scope {{item.selected ? 'ai-selected' : ''}}" data-id="{{item.id}}" bindtap="toggleScope" aria-role="checkbox" aria-checked="{{item.selected}}" aria-label="{{item.label}}"><text class="ai-checkbox">{{item.selected ? '✓' : ''}}</text><text>{{item.label}}</text></view></view><view class="ai-switch-row"><view><text>包含联系方式</text><text>默认排除家人电话、医院电话等联系信息。</text></view><switch checked="{{form.includeContacts}}" color="#98718a" data-field="includeContacts" bindchange="formSwitch" aria-label="发送联系人电话号码" /></view><view class="ai-switch-row"><view><text>启用主动附图</text><text>仅当所选模型支持图片输入时开启。每次由你选择一张图，图片不存入聊天历史。</text></view><switch checked="{{form.visionEnabled}}" color="#98718a" data-field="visionEnabled" bindchange="formSwitch" aria-label="模型支持图片输入，允许手动附图" /></view></view>
+      <view class="ai-setting-card"><button class="ai-disclosure" bindtap="toggleAdvanced" aria-expanded="{{advancedOpen}}">高级回答偏好<text>{{advancedOpen ? '收起 −' : '展开 ＋'}}</text></button><view wx:if="{{advancedOpen}}"><view class="ai-switch-row"><view><text>保留本机历史</text><text>关闭后不再保存新的聊天。已有历史可逐条删除。</text></view><switch checked="{{form.keepHistory}}" color="#98718a" data-field="keepHistory" bindchange="formSwitch" aria-label="保存对话到本机历史" /></view><view class="ai-form-grid"><view class="ai-field"><text>最大输出 tokens</text><text class="ai-help">{{form.mode === 'relay' ? '中转至少 512' : '直连至少 128'}}</text><input class="ai-input" type="number" value="{{form.maxTokens}}" data-field="maxTokens" bindinput="formInput" aria-label="模型最大输出token数量" /></view><view class="ai-field"><text>温度</text><input class="ai-input" type="digit" value="{{form.temperature}}" data-field="temperature" bindinput="formInput" aria-label="模型温度" /></view></view><view class="ai-field"><text>家庭资料预算（字符）</text><input class="ai-input" type="number" value="{{form.maxContextChars}}" data-field="maxContextChars" bindinput="formInput" placeholder="18000" aria-label="家庭资料字符预算，8000到28000" /><text class="ai-help">8000 更精简 · 18000 均衡 · 28000 更全面，预算越大通常消耗越多。</text></view><view class="ai-field"><text>额外回答偏好（可选）</text><textarea class="ai-input ai-system-input" value="{{form.systemPrompt}}" data-field="systemPrompt" bindinput="formInput" maxlength="4000" placeholder="例如：用简短中文回答，先列出需要我处理的事。" aria-label="额外系统提示偏好" /></view></view></view>
+      <view wx:if="{{error}}" class="ai-feedback" aria-role="alert">{{error}}</view><view wx:if="{{notice && !error}}" class="ai-notice" aria-role="status">{{notice}}</view><button class="ai-button ai-button-pink ai-save" bindtap="saveSettings" disabled="{{testing}}">保存设置，回到对话 ♡</button><view class="ai-settings-foot">尚未点发送或测试时，不会连接 API。</view>
+    </scroll-view>
+  </block>
+</view>

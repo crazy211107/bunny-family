@@ -1,0 +1,71 @@
+.chat-button {
+  border-radius: 9px;
+  border: 1px solid transparent;
+  line-height: 1;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.chat-button-default {
+  height: 40px;
+  padding: 0 15px;
+}
+.chat-button-sm {
+  height: 34px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.chat-button-icon {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+}
+.chat-button-primary {
+  background: var(--chat-accent);
+  color: var(--chat-on-accent) !important;
+}
+.chat-button-primary:hover {
+  filter: brightness(1.07);
+}
+.chat-button-outline {
+  border-color: var(--chat-border);
+  background: var(--chat-surface);
+}
+.chat-button-outline:hover,
+.chat-button-ghost:hover {
+  background: var(--chat-hover);
+}
+.chat-button-ghost {
+  background: transparent;
+  color: var(--chat-muted);
+}
+.chat-button-danger {
+  background: var(--chat-danger);
+  color: var(--chat-bg) !important;
+}
+.chat-app kbd {
+  font:
+    10px ui-monospace,
+    monospace;
+  border: 1px solid var(--chat-border);
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: var(--chat-muted);
+  white-space: nowrap;
+}
+.chat-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 46px;
+  color: var(--chat-accent);
+  flex-shrink: 0;
+}
+.chat-logo > svg {
+  width: 100%;
+  height: 100%;
+}
+.chat-logo-small {
+  width: 27px;
+  height: 30px;
+}

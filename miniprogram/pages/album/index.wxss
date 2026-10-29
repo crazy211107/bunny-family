@@ -1,0 +1,133 @@
+.album-page{padding-bottom:180rpx}.page-heading{display:flex;align-items:center;justify-content:space-between;gap:18rpx;margin-bottom:28rpx}.page-heading .title{font-size:45rpx}.page-heading>.button{flex-shrink:0;white-space:nowrap}.room-switch{gap:14rpx;margin-bottom:26rpx}.room-button,.filter-pill,.pet-pill{border:1rpx dashed #cbb7c3;background:#fffaf2;color:#705d71;border-radius:18rpx;padding:14rpx 23rpx;font-size:24rpx;line-height:1.5;margin:0}.room-button.active{background:#c9e7d3;border-color:#a5b9aa}.album-filters{display:flex;flex-wrap:wrap;gap:14rpx;margin-bottom:25rpx}.filter-pill{border-color:transparent;padding:10rpx 23rpx}.filter-pill.active,.pet-pill.active{background:#ffd9e8;border-color:#cba4b8;transform:rotate(-2deg)}.album-tools{padding:22rpx}.tools-row{display:flex;align-items:center;justify-content:space-between;gap:12rpx;margin-top:16rpx}.sort-pill{font-size:23rpx;padding:12rpx;color:#8a7183}.small{font-size:23rpx;line-height:1.5;padding:14rpx 20rpx}.result-line{display:flex;align-items:center;justify-content:space-between;gap:10rpx;color:#9a8192;font-size:23rpx;margin:28rpx 0}.text-action{font-size:23rpx;line-height:1.5;padding:8rpx 5rpx;background:transparent;color:#a36784;margin:0}.selection-panel{padding:25rpx;margin-bottom:30rpx;background:#f6f0e3}.batch-actions{display:flex;flex-wrap:wrap;gap:12rpx;margin-top:18rpx}.batch-actions .button{margin:0}.batch-form{border-top:1rpx dashed #d8c5cd;margin-top:24rpx;padding-top:20rpx}.pet-options{display:flex;gap:14rpx;flex-wrap:wrap;margin-top:14rpx}.batch-help{font-size:23rpx;line-height:1.8;margin-bottom:20rpx}.contact-sheet{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:35rpx 24rpx;padding:8rpx 6rpx}.photo-card{min-width:0}.polaroid{position:relative;padding:15rpx 15rpx 23rpx;background:#fffcf6;border:1rpx solid #d8c8cc;border-radius:8rpx 13rpx 7rpx 11rpx;box-shadow:5rpx 10rpx 20rpx #6b5b7312;transform:rotate(-1deg)}.photo-card:nth-child(even) .polaroid{transform:rotate(1deg)}.polaroid.selected{outline:4rpx solid #bf88a1;outline-offset:5rpx}.tape{position:absolute;left:35%;top:-12rpx;width:88rpx;height:25rpx;background:#c9e7d3a8;transform:rotate(-7deg)}.frame-no{font-size:15rpx;letter-spacing:3rpx;color:#b49caa;margin:0 0 12rpx}.photo-image{display:block;width:100%;height:305rpx}.selection-mark{position:absolute;right:22rpx;top:45rpx;display:flex;align-items:center;justify-content:center;border-radius:50%;width:36rpx;height:36rpx;background:#fff9f0e8;border:2rpx solid #b58b9f;color:#a36383;font-size:26rpx}.selected .selection-mark{background:#ffd9e8}.photo-caption{display:flex;align-items:center;justify-content:space-between;gap:8rpx;margin-top:18rpx;font-size:27rpx;line-height:1.55;color:#6b5b73}.photo-caption>text:first-child{flex:1;word-break:break-all;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:79rpx}.heart{color:#cd91aa;font-size:33rpx;flex-shrink:0}.photo-date{font-size:18rpx;color:#af9baa;margin-top:8rpx}.photo-labels{display:flex;gap:8rpx;overflow:hidden;white-space:nowrap;font-size:19rpx;color:#9e8696;padding:18rpx 3rpx 3rpx}.photo-labels text{overflow:hidden;text-overflow:ellipsis}.photo-actions{display:flex;justify-content:flex-end;align-items:center;gap:12rpx;margin-top:6rpx}.photo-actions .text-action{font-size:21rpx}.icon-action{width:42rpx;height:42rpx;line-height:42rpx;padding:0;margin:0;background:transparent;color:#ae849a;font-size:29rpx}.icon-action.liked{color:#b66b8b}.storage-note{text-align:center;font-size:23rpx;line-height:1.8;margin-top:30rpx}.album-sheet{max-height:88vh;display:flex;flex-direction:column}.sheet-scroll{height:70vh;box-sizing:border-box}.detail-photo{display:block;width:100%;height:320rpx;border:10rpx solid #fff9f0;box-sizing:border-box;transform:rotate(-1deg);margin:20rpx 0 30rpx}.album-sheet .save-btn{margin-top:32rpx;margin-bottom:40rpx}
+
+.diary-sheet,.album-sheet{height:100%;max-height:100%}.diary-sheet .drawer-head,.album-sheet .drawer-head{flex-shrink:0}.diary-sheet .drawer-head .section-title,.album-sheet .drawer-head .section-title{margin:0;font-size:33rpx}.sheet-scroll{height:calc(100vh - 170rpx);min-height:0;padding:24rpx 38rpx 90rpx;box-sizing:border-box}
+
+
+.theater-entry{flex:0 0 auto;display:flex;align-items:center;justify-content:center;height:60rpx;padding:0 22rpx;font-size:23rpx;color:#8d7386;background:#fffaf2;border:1rpx solid #dcc7d2;border-radius:30rpx}
+.theater{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;background:#3a3140;padding:calc(env(safe-area-inset-top) + 20rpx) 0 calc(env(safe-area-inset-bottom) + 30rpx)}
+.theater-bar{display:flex;align-items:center;justify-content:space-between;padding:0 34rpx}
+.theater-count{font-size:22rpx;color:#f6e6eecc;letter-spacing:2rpx}
+.theater-close{width:64rpx;height:64rpx;display:flex;align-items:center;justify-content:center;font-size:36rpx;line-height:1;color:#f6e6ee;background:#ffffff1f;border-radius:50%}
+.theater-stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:20rpx 0}
+.theater-photo{width:100%;height:100%}
+.theater-side{position:absolute;top:50%;width:72rpx;height:120rpx;display:flex;align-items:center;justify-content:center;font-size:52rpx;color:#f6e6eeaa;transform:translateY(-50%)}
+.theater-side.left{left:0}
+.theater-side.right{right:0}
+.theater-caption{display:flex;flex-direction:column;align-items:center;gap:8rpx;padding:0 40rpx}
+.theater-title{font-size:28rpx;color:#fdf3f7;text-align:center;line-height:1.6}
+.theater-date{font-size:21rpx;color:#f6e6ee99}
+
+.contact-sheet{gap:34rpx 20rpx;padding:10rpx 4rpx}
+.photo-caption{margin-top:16rpx;font-size:26rpx;align-items:flex-start}
+.photo-caption>text:first-child{-webkit-line-clamp:2;min-height:70rpx;line-height:1.45}
+.photo-caption .heart{font-size:26rpx;line-height:1.4;color:#c9899f}
+.photo-date{margin-top:6rpx;font-size:20rpx;color:#b39daa}
+.photo-labels{gap:10rpx;padding:14rpx 0 0;font-size:21rpx;color:#8d7386}
+.photo-labels text{max-width:100%;padding:4rpx 14rpx;background:#fdf0f4;border-radius:11rpx 15rpx 10rpx 14rpx}
+.photo-actions{justify-content:space-between;gap:6rpx;margin-top:14rpx;padding-top:12rpx;border-top:1rpx dashed #ecdde4}
+.photo-actions .text-action{min-height:58rpx;padding:0 8rpx;font-size:22rpx;color:#96798b}
+.photo-actions .icon-action{width:56rpx;height:56rpx;display:flex;align-items:center;justify-content:center;font-size:26rpx;line-height:1;color:#b08d9f;background:#fdf5f7;border-radius:50%}
+.photo-actions .icon-action.liked{color:#c95f84;background:#ffe4ee}
+
+.page-heading{display:flex;align-items:center;justify-content:space-between;gap:20rpx;margin-bottom:26rpx}
+.page-heading>view:first-child{flex:1;min-width:0}
+.page-heading .title{font-size:48rpx;line-height:1.4}
+.page-heading .subtitle{margin-top:8rpx}
+.page-heading .button{flex:0 0 auto;min-height:76rpx;padding:0 26rpx;font-size:24rpx;box-shadow:0 4rpx 0 #6b5b7310}
+
+.album-tools .button{min-height:76rpx;padding:0 24rpx;font-size:24rpx}
+.album-tools .input{min-height:84rpx}
+.result-line{display:flex;align-items:center;justify-content:space-between;gap:16rpx;margin:6rpx 0 22rpx;font-size:24rpx;color:#96798b}
+
+.album-group-head{display:flex;align-items:baseline;justify-content:space-between;gap:16rpx;margin:26rpx 4rpx 16rpx;padding-left:14rpx;border-left:6rpx solid #ffd9e8}
+.album-group-label{font-size:26rpx;letter-spacing:2rpx;color:#7d6478}
+.album-group-count{font-size:20rpx;color:#b39daa}
+.album-group-head+.contact-sheet{margin-top:0}
+
+.theater-meta{display:flex;align-items:center;gap:14rpx}
+.theater-state{font-size:19rpx;color:#f6e6ee88}
+.theater-track{height:4rpx;margin:14rpx 34rpx 0;background:#ffffff1f;border-radius:2rpx;overflow:hidden}
+.theater-fill{height:100%;width:0;background:#ffd9e8;border-radius:2rpx;animation:theater-fill 3.5s linear forwards}
+.fill-0{animation-name:theater-fill}
+.fill-1{animation-name:theater-fill-alt}
+@keyframes theater-fill{from{width:0}to{width:100%}}
+@keyframes theater-fill-alt{from{width:0}to{width:100%}}
+
+/* 主题册像一排可以翻看的口袋相簿，收藏关联而不复制原片。 */
+.collection-heading{display:flex;align-items:center;justify-content:space-between;gap:16rpx;margin:30rpx 2rpx 20rpx}
+.collection-heading .section-title{font-size:30rpx;margin:4rpx 0 0}
+.collection-kicker{font-size:15rpx;letter-spacing:3rpx;color:#a98b9d}
+.collection-heading .text-action{flex-shrink:0;min-height:72rpx;display:flex;align-items:center;padding:0 8rpx}
+.collection-scroll{width:100%;white-space:nowrap;margin-bottom:24rpx}
+.collection-card{display:inline-block;vertical-align:top;box-sizing:border-box;width:208rpx;padding:12rpx 12rpx 14rpx;margin:6rpx 16rpx 12rpx 0;background:#fffcf6;border:2rpx solid #e4d4da;border-radius:12rpx 20rpx 14rpx 10rpx;white-space:normal;transform:rotate(-1deg)}
+.collection-card:nth-child(even){transform:rotate(1deg)}
+.collection-card.active{border-color:#bb86a0;background:#fff0f5;box-shadow:0 5rpx 0 #dfc0ce55}
+.collection-cover{position:relative;width:100%;height:174rpx;background:#f4eddf;border-radius:6rpx;overflow:hidden}
+.collection-cover image{width:100%;height:100%}
+.collection-ribbon{position:absolute;left:0;bottom:12rpx;font-size:14rpx;letter-spacing:2rpx;color:#6b5b73;background:#ffe9a8ed;padding:3rpx 10rpx}
+.collection-paper{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#c9e7d3;color:#6b5b73}
+.collection-paper>text:first-child{font-size:66rpx;line-height:1.1}
+.collection-paper-word{font-size:13rpx;letter-spacing:2rpx;margin-top:10rpx}
+.collection-name{margin-top:12rpx;font-size:25rpx;color:#6b5b73;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.collection-count{font-size:18rpx;color:#a78c9d;margin-top:4rpx}
+.collection-placeholder{height:100%;display:flex;align-items:center;justify-content:center;color:#a88b9c;font-size:23rpx;border:1rpx dashed #d5bdc8;box-sizing:border-box}
+.collection-current{display:flex;align-items:center;justify-content:space-between;gap:12rpx;border-left:6rpx solid #c9e7d3;padding:12rpx 0 12rpx 18rpx;margin-bottom:24rpx}
+.collection-current-title{flex:1;min-width:0;font-size:25rpx;line-height:1.5;word-break:break-all}
+.collection-manage{display:flex;gap:16rpx;flex-shrink:0}
+.collection-manage .text-action{min-height:64rpx;display:flex;align-items:center;font-size:22rpx}
+.cover-button{margin-top:24rpx}
+.collection-sheet{height:100%;max-height:100%;display:flex;flex-direction:column}
+.collection-picker-scroll{flex:1;min-height:0;padding:24rpx 34rpx 90rpx;box-sizing:border-box}
+.collection-explain{font-size:24rpx;color:#9a8092;line-height:1.85;margin:12rpx 0 26rpx}
+.collection-picker-row{display:flex;align-items:center;gap:22rpx;min-height:134rpx;padding:18rpx 0;border-bottom:1rpx dashed #e4d1db}
+.collection-picker-row>image,.collection-picker-empty{width:112rpx;height:112rpx;border-radius:12rpx;flex-shrink:0;background:#c9e7d3}
+.collection-picker-empty{display:flex;align-items:center;justify-content:center;font-size:42rpx}
+.collection-picker-copy{flex:1;min-width:0;font-size:29rpx;word-break:break-all}
+.collection-picker-copy>text{display:block;font-size:21rpx;color:#a58b9d;margin-top:5rpx}
+.collection-picker-row>text{font-size:36rpx;padding:14rpx;color:#a56885}
+.collection-picker-scroll>.button{margin-top:28rpx}
+.collection-form{padding:34rpx}
+.collection-form-stamp{display:inline-block;padding:12rpx 22rpx;background:#ffe9a8;border:2rpx dashed #c8ab80;transform:rotate(-4deg);font-size:19rpx;letter-spacing:3rpx;margin:10rpx 0 30rpx}
+
+/* 紧凑的信息分层，触区保留；照片与功能分组优先于大块留白。 */
+.page-heading{margin-bottom:18rpx;gap:16rpx}
+.page-heading .title{font-size:44rpx}
+.page-heading .button,.album-tools .button,.batch-actions .button,.empty-actions .button{min-height:88rpx}
+.room-switch{margin-bottom:18rpx}
+.room-button,.filter-pill,.pet-pill{min-height:72rpx;display:flex;align-items:center;justify-content:center}
+.album-filters{gap:10rpx;margin-bottom:18rpx}
+.collection-heading{margin:20rpx 0 12rpx}
+.collection-heading .section-title{font-size:28rpx;letter-spacing:1rpx}
+.collection-card{width:196rpx;padding:10rpx 10rpx 12rpx;margin-right:14rpx}
+.collection-cover{height:148rpx}
+.collection-scroll{margin-bottom:18rpx}
+.collection-current{margin-bottom:18rpx;padding-top:4rpx;padding-bottom:4rpx}
+.album-tools{padding:18rpx}
+.tools-row{margin-top:10rpx}
+.sort-pill{min-height:72rpx;display:flex;align-items:center;color:#80667c}
+.result-line{margin:18rpx 0 14rpx;color:#80667c;font-size:23rpx;flex-wrap:wrap}
+.text-action,.collection-heading .text-action,.collection-manage .text-action{min-height:72rpx;display:flex;align-items:center;justify-content:center}
+.photo-actions .text-action,.photo-actions .icon-action{min-height:72rpx;height:72rpx}
+.photo-actions .icon-action{width:72rpx;flex-shrink:0}
+.photo-actions{gap:0;margin-top:10rpx;padding-top:6rpx}
+.photo-actions .text-action{flex:1;padding:0 4rpx}
+.photo-date,.collection-count{color:#897184}
+.photo-image{height:280rpx}
+.photo-caption>text:first-child{min-height:0}
+.album-group-head{margin-top:22rpx;margin-bottom:12rpx}
+.contact-sheet{gap:26rpx 20rpx}
+.collection-explain{color:#806c7b}
+.collection-count{font-size:20rpx}
+.collection-name{font-size:24rpx}
+.empty-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:16rpx;margin:12rpx 0 24rpx}
+.empty-actions .button{margin:0;font-size:24rpx;padding:0 24rpx}
+.control-pressed{opacity:.7;transform:scale(.98)}
+@media (max-width:350px){.page-heading .title{font-size:40rpx}.collection-current{flex-wrap:wrap}.collection-manage{margin-left:auto}.photo-actions .icon-action{width:64rpx}.photo-actions .text-action{font-size:21rpx}}
+@media (min-width:600px){.contact-sheet{grid-template-columns:repeat(3,minmax(0,1fr))}.photo-image{height:260rpx}}
+@media (prefers-reduced-motion:reduce){.collection-card,.polaroid{transform:none}.theater-fill{animation:none}}
+
+
+
+
+
+.photo-date,.album-group-count,.collection-kicker,.collection-count,.collection-placeholder,.collection-explain,.collection-picker-copy>text,.result-line{color:#806c7b;font-size:22rpx}.photo-actions .text-action,.collection-picker-row>text{color:#875873}.photo-actions .icon-action{color:#875873;min-width:88rpx;min-height:88rpx}.collection-card.active .collection-name::before{content:'✓ ';color:#6b5b73}.album-tools .input{min-height:88rpx}.album-sheet .close{width:88rpx;height:88rpx}.collection-cover{background:#f4e8df}.theater-entry{min-height:88rpx;display:flex;align-items:center}.album-empty-action{min-height:88rpx}

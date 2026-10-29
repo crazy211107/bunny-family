@@ -1,0 +1,6 @@
+<view class="empty-state">
+  <text class="empty-symbol" wx:if="{{symbol}}">{{symbol}}</text>
+  <text class="empty-text">{{text}}</text>
+  <text class="empty-sub" wx:if="{{sub}}">{{sub}}</text>
+  <view wx:if="{{action}}" class="button pink empty-action" bindtap="onAction" hover-class="empty-action-hover" aria-role="button" aria-label="{{action}}">{{action}}</view>
+</view>
