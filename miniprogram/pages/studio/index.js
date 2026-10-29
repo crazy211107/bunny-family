@@ -71,7 +71,7 @@ async image(id){
   throw lastError||new Error('图片解码失败');
 },
 async loadImages(){if(!this.canvas||!this.currentId){this.setData({ready:false,error:'先去相册带一帧回忆过来吧。'});return;}const token=(this.loadToken||0)+1;this.loadToken=token;this.setData({ready:false,error:''});try{const ids=[this.currentId];if(this.settings.template==='comic')ids.push.apply(ids,(this.settings.photoSlots||[]).filter(Boolean));if(this.settings.template==='exposure'&&this.settings.secondaryId)ids.push(this.settings.secondaryId);await Promise.all(Array.from(new Set(ids)).map(id=>this.image(id)));if(token!==this.loadToken)return;this.setData({ready:true});this.draw();}catch(error){if(token===this.loadToken)this.setData({error:'图片读取失败：'+(error.message||'未知原因'),ready:false});}},
- draw(selected){try{painter.renderArtwork(this.canvas,this.images[this.currentId],this.settings,selected===false?null:this.data.selectedId,this.images);this.verifyPaint();}catch(error){this.setData({error:error.message||'作品绘制失败'});}},
+ draw(selected){try{painter.renderArtwork(this.canvas,this.images[this.currentId],this.settings,selected===false?null:this.data.selectedId,this.images)}catch(error){this.setData({error:error.message||'作品绘制失败'});}},
  remember(base){this.past.push(store.clone(base||this.settings));if(this.past.length>30)this.past.shift();this.future=[];},
  edit(key,value,load){this.remember();this.settings[key]=value;this.sync();if(load)this.loadImages();},
  undo(){if(!this.past.length)return;this.future.unshift(store.clone(this.settings));this.settings=this.past.pop();this.setData({selectedId:''});this.sync();this.loadImages();},
