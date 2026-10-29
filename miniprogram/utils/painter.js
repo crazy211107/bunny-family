@@ -339,6 +339,19 @@ function makeSnapshot(canvas) {
   }
 }
 
+// 快照很贵（900×1000 位图 + 全画布 drawImage）。拖拽时模板、照片、调色都没变，
+// 因此按签名缓存：签名不变就复用，避免每帧重建 3.6MB。
+var snapshotCache = { key: null, canvas: null };
+
+function snapshotFor(canvas, signature) {
+  if (!signature) return makeSnapshot(canvas);
+  if (snapshotCache.key === signature && snapshotCache.canvas) return snapshotCache.canvas;
+  var snap = makeSnapshot(canvas);
+  snapshotCache.key = signature;
+  snapshotCache.canvas = snap;
+  return snap;
+}
+
 function drawMosaic(context, snapshot, stroke) {
   const block = Math.max(8, Math.min(22, Math.round(stroke.width / 2)));
   const radius = Math.max(stroke.width / 2, block / 2);
@@ -423,7 +436,7 @@ function drawStrokes(context, strokes, areas, snapshot) {
 
 /* ---------------- 主渲染 ---------------- */
 
-function renderArtwork(canvas, primaryImage, settings, selectedId, images) {
+function renderArtwork(canvas, primaryImage, settings, selectedId, images, signature) {
   if (!canvas || typeof canvas.getContext !== 'function') {
     throw new Error('照片画布还没准备好');
   }
@@ -561,7 +574,7 @@ function renderArtwork(canvas, primaryImage, settings, selectedId, images) {
     strokes.filter(function (stroke) {
       return stroke.tool === 'mosaic';
     }).length > 0
-      ? makeSnapshot(canvas)
+      ? snapshotFor(canvas, signature)
       : null;
   drawStrokes(context, strokes, photoAreas, snapshot);
 

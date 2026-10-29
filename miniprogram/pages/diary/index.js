@@ -11,6 +11,7 @@ const hasContent = (form) =>
   list(form.photoIds).length > 0;
 Page({
   data: {
+    pageError: "",
     today: "",
     query: "",
     dateFilter: "",
@@ -60,7 +61,7 @@ Page({
   noop() {},
   error(error) {
     const message = (error && error.message) || "暂时没有保存成功，请稍后再试";
-    this.setData({ formError: message });
+    this.setData({ formError: message, pageError: message });
     store.toast(message);
   },
   invalid(message) {
@@ -70,6 +71,7 @@ Page({
   reload() {
     try {
       this._state = store.get();
+      if (this.data.pageError) this.setData({ pageError: '' });
       this.setData({ today: store.date() });
       this.refresh();
     } catch (error) {

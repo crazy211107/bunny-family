@@ -561,6 +561,19 @@ Page({
   deleteReminder(event) {
     const id = event.currentTarget.dataset.id;
     const petId = this.data.selectedId;
+    wx.showModal({
+      title: "收起这条提醒？",
+      content: "删除后这条提醒不会再出现在首页的「今天要记得的」里。",
+      confirmText: "删除提醒",
+      confirmColor: "#9b6d85",
+      success: (result) => {
+        if (!result.confirm) return;
+        this.removeReminder(id, petId);
+      },
+    });
+  },
+
+  removeReminder(id, petId) {
     this.mutate((draft) => {
       const pet = draft.pets.find((item) => item.id === petId);
       if (pet)

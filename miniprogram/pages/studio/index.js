@@ -71,7 +71,7 @@ async image(id){
   throw lastError||new Error('图片解码失败');
 },
 async loadImages(){if(!this.canvas||!this.currentId){this.setData({ready:false,error:'先去相册带一帧回忆过来吧。'});return;}const token=(this.loadToken||0)+1;this.loadToken=token;this.setData({ready:false,error:''});try{const ids=[this.currentId];if(this.settings.template==='comic')ids.push.apply(ids,(this.settings.photoSlots||[]).filter(Boolean));if(this.settings.template==='exposure'&&this.settings.secondaryId)ids.push(this.settings.secondaryId);await Promise.all(Array.from(new Set(ids)).map(id=>this.image(id)));if(token!==this.loadToken)return;this.setData({ready:true});this.draw();}catch(error){if(token===this.loadToken)this.setData({error:'图片读取失败：'+(error.message||'未知原因'),ready:false});}},
- draw(selected){try{painter.renderArtwork(this.canvas,this.images[this.currentId],this.settings,selected===false?null:this.data.selectedId,this.images)}catch(error){this.setData({error:error.message||'作品绘制失败'});}},
+ draw(selected){try{const signature=this.currentId+'|'+this.settings.template+'|'+JSON.stringify(this.settings.meta||{});painter.renderArtwork(this.canvas,this.images[this.currentId],this.settings,selected===false?null:this.data.selectedId,this.images,signature)}catch(error){this.setData({error:error.message||'作品绘制失败'});}},
  remember(base){this.past.push(store.clone(base||this.settings));if(this.past.length>30)this.past.shift();this.future=[];},
  edit(key,value,load){this.remember();this.settings[key]=value;this.sync();if(load)this.loadImages();},
  undo(){if(!this.past.length)return;this.future.unshift(store.clone(this.settings));this.settings=this.past.pop();this.setData({selectedId:''});this.sync();this.loadImages();},
@@ -105,7 +105,20 @@ finishGesture(){
  secondary(e){const i=Number(e.detail.value);this.edit('secondaryId',i>0?this.photos[i-1].id:'',true);},
  saveDraft(){this.titleEnd();try{const id=this.draftId||store.uid();const draft={id,name:this.settings.title||'还没写完的可爱',photoId:this.currentId,settings:store.clone(this.settings),updatedAt:new Date().toISOString()};store.update(s=>{s.editorDrafts=[draft].concat(s.editorDrafts.filter(d=>d.id!==id));});this.draftId=id;this.loadState();store.toast('草稿留好啦，下次接着写 ♡');}catch(error){store.toast('草稿未能保存，请检查本机空间');}},
  restore(e){const draft=(store.get().editorDrafts||[]).find(d=>d.id===e.currentTarget.dataset.id);if(!draft)return;if(!this.photos.some(p=>p.id===draft.photoId)){store.toast('请先从相册回收站恢复主照片');return;}this.currentId=draft.photoId;this.draftId=draft.id;this.settings=Object.assign(defaults(),store.clone(draft.settings));this.past=[];this.future=[];this.setData({selectedId:''});this.loadState();this.loadImages();},
- removeDraft(e){try{store.update(s=>{s.editorDrafts=s.editorDrafts.filter(d=>d.id!==e.currentTarget.dataset.id);});this.loadState();}catch(error){store.toast('草稿未能移除');}},
+ removeDraft(e){
+   const id=e.currentTarget.dataset.id;
+   wx.showModal({
+     title:'收起这份草稿？',
+     content:'删除后这份编辑参数无法恢复。',
+     confirmText:'删除草稿',
+     confirmColor:'#9b6d85',
+     success:(result)=>{
+       if(!result.confirm)return;
+       try{store.update(s=>{s.editorDrafts=s.editorDrafts.filter(d=>d.id!==id);});this.loadState();}
+       catch(error){store.toast('草稿未能移除');}
+     }
+   });
+ },
  exportFile(){return new Promise((resolve,reject)=>wx.canvasToTempFilePath({canvas:this.canvas,fileType:'png',destWidth:900,destHeight:1000,success:r=>resolve(r.tempFilePath),fail:reject},this));},
  async saveWork(e){if(!this.data.ready||this.data.busy)return;this.titleEnd();this.finishGesture();this.setData({busy:true,error:''});try{this.draw(false);const temp=await this.exportFile();if(e.currentTarget.dataset.kind==='device'){await new Promise((resolve,reject)=>wx.saveImageToPhotosAlbum({filePath:temp,success:resolve,fail:reject}));store.toast('已存入手机相册 ♡');}else{const src=await store.saveFile(temp),id=store.uid(),original=this.photos.find(p=>p.id===this.currentId);store.update(s=>{s.photos.unshift({id,src,title:this.settings.title||'新的一帧小美好',tag:'作品',petIds:original&&original.petIds||[],date:store.date(),liked:false,template:this.settings.template});});store.toast('作品已收进回忆相册 ♡');this.loadState();}}catch(error){this.setData({error:error.errMsg||error.message||'保存失败，请检查相册授权和本机空间。'});}finally{this.setData({busy:false});this.draw();}},
  reset(){this.remember();this.settings=defaults();this.setData({selectedId:''});this.sync();this.loadImages();}

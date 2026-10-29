@@ -175,8 +175,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 76rpx;
-  height: 76rpx;
+  width: 88rpx;
+  height: 88rpx;
   font-size: 40rpx;
   line-height: 1;
   background: #f8e8ed;
@@ -253,3 +253,28 @@
 .drawer { display: flex; flex-direction: column; }
 .drawer-head { flex-shrink: 0; }
 .drawer-body { flex: 1; height: 0; min-height: 0; }
+
+/* ---------- 页面级读取失败：与「空态」明确区分 ---------- */
+.page-error {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin: 8rpx 0 18rpx;
+  padding: 18rpx 20rpx;
+  background: #fff1f3;
+  border: 1rpx solid #f0cdd4;
+  border-radius: 20rpx 28rpx 18rpx 26rpx;
+}
+.page-error-text { flex: 1; min-width: 0; font-size: 23rpx; line-height: 1.7; color: #a8607f; }
+.page-error-retry {
+  flex: 0 0 auto;
+  min-height: 64rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 22rpx;
+  font-size: 22rpx;
+  color: #fff9f0;
+  background: #c98fa8;
+  border-radius: 18rpx;
+}
+.page-error-hover { transform: scale(.97); opacity: .9; }
