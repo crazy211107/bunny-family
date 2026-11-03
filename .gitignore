@@ -8,3 +8,6 @@ output/
 
 # agent 工作记忆，不属于项目代码
 .workbuddy/
+
+# 微信开发者工具个人设置，不随仓库分发
+project.private.config.json
