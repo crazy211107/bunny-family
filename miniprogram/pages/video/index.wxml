@@ -1,8 +1,8 @@
 <page-top />
 <view class="page video-page">
-  <view class="page-heading"><view><view class="page-eyebrow">04 / 家里的短片手账</view><view class="title">会动的小美好</view><view class="subtitle">给片段留句旁白，让可爱多停一会儿。</view></view><button class="text-btn" disabled="{{busy || choosing}}" bindtap="newDraft">＋ 新草稿</button></view>
+  <page-heading eyebrow="06 / 家里的短片手账" title="会动的小美好" description="原片、旁白和小心思，一起收进胶片盒。" action="＋ 新草稿" disabled="{{busy || choosing}}" bind:primary="newDraft" />
   <view class="video-workflow" aria-label="视频草稿操作流程"><view class="workflow-item {{src ? 'complete' : 'current'}}"><text class="workflow-number">{{src ? '✓' : '1'}}</text><text>选片段</text></view><text class="workflow-line">⌁</text><view class="workflow-item {{src ? 'current' : ''}}"><text class="workflow-number">2</text><text>写旁白</text></view><text class="workflow-line">⌁</text><view class="workflow-item"><text class="workflow-number">3</text><text>存草稿</text></view></view>
-  <view class="paper-card video-preview">
+  <view class="video-workspace"><view class="paper-card video-preview">
     <view class="tape"></view>
     <view class="preview-heading"><view class="preview-eyebrow">OUR LITTLE MOVIE</view><text class="preview-badge">{{currentId ? '正在续写' : '视频草稿'}}</text></view>
     <view class="video-stage" wx:if="{{src}}">
@@ -26,7 +26,7 @@
     <view class="feedback" wx:if="{{error}}" aria-role="alert">{{error}}</view>
     <button class="save-btn" loading="{{busy}}" disabled="{{busy}}" bindtap="save">{{busy ? '正在把回忆收好…' : currentId ? '更新这份视频草稿' : '把视频草稿收好 ♡'}}</button>
     <view class="tiny">草稿仅保存在当前设备。字幕、调色不会写入原视频。</view>
-  </view>
+  </view></view>
   <view class="section-title">胶片盒里的草稿 <text class="draft-count">{{drafts.length}}</text></view>
   <view class="draft-row paper-card" wx:for="{{drafts}}" wx:key="id" data-id="{{item.id}}" bindtap="openDraft" hover-class="control-pressed" aria-role="button" aria-label="打开视频草稿{{item.title}}"><view class="draft-symbol">▷</view><view class="draft-copy"><view class="draft-title">{{item.title}}</view><view class="tiny">{{item.date}} · {{item.filter}}滤镜批注</view></view><text class="draft-open">翻开 ↗</text></view>
   <empty-state wx:if="{{!drafts.length}}" text="胶片盒还空着" sub="原视频与旁白批注一起留在本机，下次接着写。" action="选择一段可爱" bind:action="choose" />

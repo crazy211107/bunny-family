@@ -1,5 +1,6 @@
 {
   "usingComponents": {
-    "empty-state": "/components/empty-state/index"
+    "empty-state": "/components/empty-state/index",
+    "page-heading": "/components/page-heading/index"
   }
 }

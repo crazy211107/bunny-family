@@ -1,10 +1,6 @@
 <page-top />
 <view class="page pet-page">
-  <view class="pet-header">
-    <text class="page-eyebrow">01 / 小主的成长档案</text>
-    <text class="pet-title">兔兔档案 ♡</text>
-    <text class="pet-sub">照顾、成长与提醒，收在同一页。</text>
-  </view>
+  <page-heading eyebrow="01 / 小主的成长档案" title="兔兔档案 ♡" description="照顾、成长与提醒，都留在这一页。" action="编辑档案" bind:primary="openPetEditor" />
 
   <view class="pet-switch" aria-label="选择兔兔">
     <view wx:for="{{pets}}" wx:key="id" class="pet-chip {{item.selected ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectPet" hover-class="pet-control-pressed" aria-role="button" aria-label="{{item.name}}{{item.selected ? '，当前已选中' : '，点击切换'}}">
@@ -16,28 +12,28 @@
 
   <view wx:if="{{pet}}">
     <!-- 封面：一张大图 + 档案抬头 + 三个当日指标 -->
-    <view class="pet-cover">
+    <view class="pet-profile-layout"><view class="pet-cover">
       <image class="cover-photo" src="{{pet.photo}}" mode="aspectFill" />
       <view class="cover-veil"></view>
       <view class="cover-photo-change" bindtap="openPetEditor" hover-class="pet-control-pressed" aria-role="button" aria-label="更换{{pet.name}}的档案照片">换照片 ✎</view>
       <view class="cover-top">
-        <text class="cover-tag">RABBIT FILE</text>
+        <text class="cover-tag">小主档案 / RABBIT FILE</text>
         <text class="cover-breed">{{pet.breed || '还在慢慢认识你'}}</text>
       </view>
       <view class="cover-bottom">
         <view class="cover-name">{{pet.name}}<text class="cover-heart">♡</text></view>
-        <view class="cover-stats">
+
+      </view>
+    </view>
+
+    <!-- 档案栏 -->
+    <view class="pet-card file-card"><view class="cover-stats">
           <view class="cover-stat"><text class="stat-num">{{todayCount}}<text class="stat-unit">/4</text></text><text class="stat-label">今日照顾</text></view>
           <view class="cover-line"></view>
           <view class="cover-stat"><text class="stat-num">{{consecutiveDays}}</text><text class="stat-label">连续天数</text></view>
           <view class="cover-line"></view>
           <view class="cover-stat"><text class="stat-num">{{recentCount}}</text><text class="stat-label">近 7 天</text></view>
         </view>
-      </view>
-    </view>
-
-    <!-- 档案栏 -->
-    <view class="pet-card file-card">
       <view class="file-row">
         <view class="file-cell"><text class="file-label">小小身份</text><text class="file-value">{{pet.breed || '待填写'}}</text></view>
         <view class="file-cell"><text class="file-label">在这个世界</text><text class="file-value">{{pet.age}}</text></view>
@@ -47,7 +43,7 @@
         <view class="file-cell"><text class="file-label">绝育状态</text><text class="file-value">{{pet.neutered}}</text></view>
       </view>
       <view class="file-edit" bindtap="openPetEditor" hover-class="file-edit-hover" aria-role="button" aria-label="编辑{{pet.name}}的基本档案">完善这份档案 <text>编辑 ↗</text></view>
-    </view>
+    </view></view>
 
     <!-- 今日照顾 -->
     <view class="pet-card care-card">

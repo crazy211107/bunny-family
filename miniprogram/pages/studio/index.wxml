@@ -1,14 +1,7 @@
 <page-top />
 <bunny-menu hide-dock="{{true}}" />
 <view class="page studio-page">
-  <view class="page-heading">
-    <view>
-      <view class="page-eyebrow">03 / 把照片做成一页小故事</view>
-      <view class="title">创意工坊</view>
-      <view class="subtitle">模板、贴纸与涂鸦，留下你的手作痕迹。</view>
-    </view>
-    <button class="text-btn" bindtap="upload">＋ 换照片</button>
-  </view>
+  <page-heading eyebrow="05 / 把小日子做成手作" title="创意工坊" description="调一束光，贴一句话，留下这一帧。" action="换照片" bind:primary="upload" />
 
   <view class="workshop-steps">
     <text class="step {{ready ? 'done' : ''}}">01 选照片</text>
@@ -18,30 +11,37 @@
     <text class="step">03 收好作品</text>
   </view>
 
-  <view class="paper-card editor-film">
+  <view class="studio-workspace"><view class="paper-card editor-film">
     <view class="tape"></view>
     <view class="preview-top">
       <view class="preview-copy"><text class="preview-label">作品预览</text><text class="preview-meta">{{templateName}} · {{settings.stickers.length}} 张贴纸 · {{settings.strokes.length}} 笔</text></view>
-      <button class="text-btn" bindtap="reset">↺ 复位</button>
+      <button class="text-btn" bindtap="reset" disabled="{{busy}}">↺ 复位</button>
     </view>
     <view class="history-bar">
-      <button class="text-btn" bindtap="undo" disabled="{{!canUndo}}" aria-label="撤销上一步编辑">↶ 撤销</button>
+      <button class="text-btn" bindtap="undo" disabled="{{!canUndo || busy}}" aria-label="撤销上一步编辑">↶ 撤销</button>
       <text class="step-count">{{steps}} / 30 步</text>
-      <button class="text-btn" bindtap="redo" disabled="{{!canRedo}}" aria-label="重做编辑">↷ 重做</button>
-      <button class="text-btn draft-save" bindtap="saveDraft">▤ 留作草稿</button>
+      <button class="text-btn" bindtap="redo" disabled="{{!canRedo || busy}}" aria-label="重做编辑">↷ 重做</button>
+      <button class="text-btn draft-save" bindtap="saveDraft" disabled="{{!photos.length || busy}}">▤ 存草稿</button>
     </view>
 
-    <view class="canvas-stage {{tool === '涂鸦' ? 'drawing' : ''}}">
+    <view class="canvas-stage {{tool === '画笔' ? 'drawing' : ''}}">
       <canvas
+        wx:if="{{canvasMounted}}"
         type="2d"
         id="artboard"
         class="artboard"
+        style="height:{{canvasHeight}}px"
         bindtouchstart="touchStart"
         catchtouchmove="touchMove"
         bindtouchend="finishGesture"
         bindtouchcancel="finishGesture"
-        aria-label="可编辑照片画布，可拖动贴纸或画笔涂鸦"
+        aria-label="作品画布；构图工具可拖动照片，贴纸和文字可拖动，也可用下方位置滑杆调整"
       ></canvas>
+      <view wx:else class="artboard canvas-paused" style="height:{{canvasHeight}}px" aria-role="status">画布已暂收起，关闭目录或豆伴后继续编辑</view>
+    </view>
+    <view class="preview-actions">
+      <text class="preview-hint">{{comparing ? '原片对照 · 保留模板' : tool === '构图' ? '在画布拖动，微调取景' : tool === '画笔' ? '直接落笔 · 每笔都能撤销' : '点选文字或贴纸，再拖动'}}</text>
+      <button class="text-btn" disabled="{{!ready || busy}}" bindtap="toggleCompare" aria-label="{{comparing ? '回到编辑作品' : '查看保留模板的原片对照'}}">{{comparing ? '回到编辑 ↩' : '◐ 原片对照'}}</button>
     </view>
     <view class="canvas-note" wx:if="{{!ready}}" aria-role="status">{{error || '正在展开照片…'}}<button wx:if="{{!photos.length}}" class="text-btn" bindtap="upload">＋ 选择第一张照片</button><button wx:elif="{{error}}" class="text-btn" bindtap="loadImages">重新展开照片</button></view>
     <view class="rail-caption"><text>换一帧回忆</text><text>{{photos.length}} 张可选 · 左右滑动</text></view>
@@ -66,21 +66,24 @@
   </view>
 
   <view class="paper-card editor-controls">
+    <view class="editing-lock" wx:if="{{busy}}" catchtap="stop" catchtouchmove="stop" aria-role="status">正在收好作品…</view>
     <view class="studio-tabs">
       <button
         wx:for="{{tools}}"
         wx:key="*this"
         class="studio-tab {{tool === item ? 'selected' : ''}}"
+        disabled="{{busy}}"
         data-tool="{{item}}"
         bindtap="tool"
         aria-label="{{item}}工具{{tool === item ? '，已选中' : ''}}"
       >{{item}}</button>
     </view>
 
+    <view class="tool-return"><text>小工具 · {{tool}}</text><button class="text-btn" bindtap="focusCanvas" aria-label="滚动回作品预览">回看画布 ↑</button></view>
     <view class="tool-body">
       <block wx:if="{{tool === '模板'}}">
         <view class="tool-title">给回忆穿件新衣服</view>
-        <view class="muted">八款小心思，每一款都能真的导出。</view>
+        <view class="muted">十款纸上小故事。多图模板可为每个镜头单独选图。</view>
         <view class="template-grid">
           <button
             wx:for="{{templates}}"
@@ -91,16 +94,18 @@
             aria-label="{{item.name}}模板{{settings.template === item.id ? '，已选中' : ''}}"
           >
             <view class="template-art template-{{item.id}}" style="background:{{item.color}}">
-              <image class="template-photo" src="{{chosenSrc}}" mode="aspectFill" />
+              <view class="template-thumbs thumbs-{{item.id}}"><image wx:for="{{item.frames}}" wx:for-item="frame" wx:key="*this" class="template-photo" src="{{chosenSrc}}" mode="aspectFill" /></view>
               <text class="template-badge" wx:if="{{item.id === 'comic'}}">四格</text>
+              <text class="template-badge" wx:elif="{{item.id === 'duo'}}">双联</text>
+              <text class="template-badge" wx:elif="{{item.id === 'strip'}}">三连</text>
             </view>
             <text class="template-name">{{item.name}}</text>
           </button>
         </view>
 
-        <view class="sub-block" wx:if="{{settings.template === 'comic'}}">
-          <view class="tool-subtitle">四格故事，每一格都可以换图</view>
-          <view class="slot-grid">
+        <view class="sub-block" wx:if="{{slots.length}}">
+          <view class="tool-subtitle">{{slots.length}} 个镜头 · 每一格都可以换图</view>
+          <view class="slot-grid" style="grid-template-columns:repeat({{slots.length}},minmax(0,1fr))">
             <picker
               wx:for="{{slots}}"
               wx:key="index"
@@ -123,166 +128,153 @@
             <view class="picker-input">{{photoTitles[secondaryIndex]}}<text class="picker-arrow">⌄</text></view>
           </picker>
         </view>
+
+        <view class="sub-block">
+          <view class="tool-subtitle">换一张信纸</view>
+          <view class="paper-options">
+            <button wx:for="{{papers}}" wx:key="name" class="paper-option {{settings.paper === item.value ? 'selected' : ''}}" data-value="{{item.value}}" bindtap="paper" aria-label="{{item.name}}{{settings.paper === item.value ? '，已选中' : ''}}">
+              <view class="paper-swatch" style="background:{{item.value || '#f0e6dc'}}">{{settings.paper === item.value ? '✓' : ''}}</view><text>{{item.name}}</text>
+            </button>
+          </view>
+        </view>
+      </block>
+
+      <block wx:elif="{{tool === '构图'}}">
+        <view class="tool-title">让可爱，刚好在画面里</view>
+        <view class="muted">调整取景，不裁坏原图。选一个镜头，给每一只兔兔留好位置。</view>
+        <picker wx:if="{{slots.length}}" range="{{compositionTitles}}" value="{{compositionValue}}" bindchange="compositionTarget" aria-label="选择要调整取景的镜头"><view class="picker-input">{{compositionTitles[compositionValue]}} ⌄</view></picker>
+        <view class="tiny" wx:if="{{slots.length}}">整组调整会替换各镜头独立取景，可撤销。只换照片请回「模板」。</view>
+        <view class="transform-actions">
+          <button class="brush-chip" bindtap="rotatePhoto" aria-label="照片顺时针旋转90度">↻ {{currentTransform.rotation}}°</button>
+          <button class="brush-chip {{currentTransform.flipX ? 'selected' : ''}}" data-key="flipX" bindtap="flipPhoto">↔ 水平翻转</button>
+          <button class="brush-chip {{currentTransform.flipY ? 'selected' : ''}}" data-key="flipY" bindtap="flipPhoto">↕ 垂直翻转</button>
+        </view>
+        <view class="tone-row"><text class="field-label">放大取景</text><text class="tone-value">{{currentTransform.zoom}} ×</text></view>
+        <slider class="tone-slider" min="1" max="3" step="0.05" value="{{currentTransform.zoom}}" data-key="zoom" bindchange="transform" activeColor="#ce8ba7" block-size="22" aria-label="照片缩放，1到3倍" />
+        <view class="tone-row"><text class="field-label">左右位置</text><text class="tone-value">{{currentTransform.x}}</text></view>
+        <slider class="tone-slider" min="-100" max="100" value="{{currentTransform.x}}" data-key="x" bindchange="transform" activeColor="#ce8ba7" block-size="22" aria-label="照片左右位置" />
+        <view class="tone-row"><text class="field-label">上下位置</text><text class="tone-value">{{currentTransform.y}}</text></view>
+        <slider class="tone-slider" min="-100" max="100" value="{{currentTransform.y}}" data-key="y" bindchange="transform" activeColor="#ce8ba7" block-size="22" aria-label="照片上下位置" />
+        <view class="tiny">移到边缘会自动停住，不露出空白。没有多余裁切空间时，该方向的移动不改变画面。</view>
+        <button class="button small-action" bindtap="resetTransform">↺ 只还原构图</button>
       </block>
 
       <block wx:elif="{{tool === '贴纸'}}">
         <view class="tool-title">今天也要兔里兔气</view>
         <view class="muted">添加后在画布上直接拖，也能用下面的滑杆细调。</view>
         <view class="sticker-tray">
-          <button class="sticker-chip" data-type="ears" bindtap="sticker">兔耳朵</button>
-          <button class="sticker-chip" data-type="carrot" bindtap="sticker">胡萝卜</button>
-          <button class="sticker-chip" data-type="heart" bindtap="sticker">小爱心</button>
-          <button class="sticker-chip" data-type="star" bindtap="sticker">闪亮星</button>
+          <button wx:for="{{stickerTypes}}" wx:key="id" class="sticker-chip" data-type="{{item.id}}" bindtap="sticker"><text class="sticker-symbol">{{item.symbol}}</text>{{item.name}}</button>
         </view>
-        <view class="adjust-block" wx:if="{{currentSticker}}">
-          <view class="field-label">贴纸大小 · {{currentSticker.scale}}</view>
-          <slider
-            class="tone-slider"
-            min="0.5"
-            max="2.5"
-            step="0.05"
-            value="{{currentSticker.scale}}"
-            activeColor="#ce8ba7"
-            backgroundColor="#efdfe6"
-            block-size="22"
-            block-color="#ce8ba7"
-            data-key="scale"
-            bindchange="stickerAdjust"
-            aria-label="贴纸大小"
-          />
-          <view class="field-label">转个方向 · {{currentSticker.rotation}}°</view>
-          <slider
-            class="tone-slider"
-            min="-180"
-            max="180"
-            step="1"
-            value="{{currentSticker.rotation}}"
-            activeColor="#ce8ba7"
-            backgroundColor="#efdfe6"
-            block-size="22"
-            block-color="#ce8ba7"
-            data-key="rotation"
-            bindchange="stickerAdjust"
-            aria-label="贴纸旋转角度"
-          />
-          <button class="button small-action" bindtap="removeSticker">移除贴纸（可以撤销）</button>
-        </view>
-        <view class="sticker-tip" wx:else>点选一张贴纸，就能调整大小与角度。</view>
+        <view class="sticker-tip">贴纸和文字都在下方的「图层小抽屉」里，可以找回被遮住的图层。</view>
       </block>
 
-      <block wx:elif="{{tool === '涂鸦'}}">
+      <block wx:elif="{{tool === '画笔'}}">
         <view class="tool-title">给照片画一句悄悄话</view>
         <view class="brush-row">
-          <button
-            wx:for="{{brushes}}"
-            wx:key="id"
-            class="brush-chip {{brush === item.id ? 'selected' : ''}}"
-            data-id="{{item.id}}"
-            bindtap="brush"
-            aria-label="{{item.title}}{{brush === item.id ? '，已选中' : ''}}"
-          >{{item.title}}</button>
+          <button wx:for="{{brushes}}" wx:key="id" class="brush-chip {{brush === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="brush" aria-label="{{item.title}}{{brush === item.id ? '，已选中' : ''}}">{{item.title}}</button>
         </view>
         <view class="color-row">
-          <button
-            wx:for="{{colors}}"
-            wx:key="*this"
-            class="color-dot {{color === item ? 'selected' : ''}}"
-            data-color="{{item}}"
-            bindtap="color"
-            style="background:{{item}}"
-            aria-label="{{colorNames[index]}}画笔{{color === item ? '，已选中' : ''}}"
-          ><text wx:if="{{color === item}}">✓</text></button>
+          <button wx:for="{{colors}}" wx:key="*this" class="color-dot {{color === item ? 'selected' : ''}}" data-color="{{item}}" bindtap="color" style="background:{{item}}" aria-label="{{colorNames[index]}}画笔{{color === item ? '，已选中' : ''}}"><text wx:if="{{color === item}}">✓</text></button>
         </view>
         <view class="field-label">笔触大小 · {{brushWidth}}</view>
-        <slider
-          class="tone-slider"
-          min="3"
-          max="35"
-          value="{{brushWidth}}"
-          activeColor="#ce8ba7"
-          backgroundColor="#efdfe6"
-          block-size="22"
-          block-color="#ce8ba7"
-          bindchanging="brushWidth"
-          bindchange="brushWidth"
-          aria-label="画笔粗细"
-        />
-        <view class="muted">在照片区域直接画。每一笔都能撤销；马赛克取样原照片，不覆盖文字与贴纸。</view>
+        <slider class="tone-slider" min="3" max="35" value="{{brushWidth}}" activeColor="#ce8ba7" block-size="22" bindchanging="brushWidth" bindchange="brushWidth" aria-label="画笔粗细" />
+        <view class="muted">在照片区域直接画。每一笔都能撤销；马赛克只取样照片，不覆盖文字与贴纸。</view>
         <button class="button small-action" bindtap="clearInk" disabled="{{!settings.strokes.length}}">清空笔画（可以撤销）</button>
       </block>
 
       <block wx:elif="{{tool === '文字'}}">
-        <view class="tool-title">想对这一刻说什么？</view>
-        <view class="field">
-          <view class="field-label">照片批注</view>
-          <input class="input" maxlength="24" value="{{settings.title}}" bindinput="inputTitle" bindblur="titleEnd" aria-label="作品照片批注，最多24字" placeholder="写一句软乎乎的话" />
-          <view class="input-counter">{{settings.title.length}} / 24 字</view>
+        <view class="tool-title">让这一帧，有自己的旁白</view>
+        <view class="field"><view class="field-label">照片下方的批注</view>
+          <input class="input" maxlength="40" value="{{settings.title}}" bindinput="inputTitle" bindblur="titleEnd" aria-label="作品批注，最多40字" placeholder="写一句软乎乎的话" />
         </view>
-        <view class="field">
-          <view class="field-label">字迹</view>
-          <picker range="{{fonts}}" value="{{fontIndex}}" bindchange="font">
-            <view class="picker-input">{{fonts[fontIndex]}}<text class="picker-arrow">⌄</text></view>
-          </picker>
+        <view class="caption-style">
+          <picker range="{{fonts}}" value="{{fontIndex}}" bindchange="font" aria-label="选择批注字迹"><view class="picker-input">{{fonts[fontIndex]}} ⌄</view></picker>
+          <text class="field-label">字号 {{settings.titleSize}}</text>
         </view>
-        <view class="tiny">字迹随设备字体回退，正式上线前需配置授权字体。</view>
+        <slider class="tone-slider" min="16" max="30" value="{{settings.titleSize}}" data-key="titleSize" bindchange="titleStyle" activeColor="#ce8ba7" block-size="22" aria-label="批注字号" />
+        <view class="color-row">
+          <button wx:for="{{colors}}" wx:key="*this" class="color-dot {{settings.titleColor === item ? 'selected' : ''}}" data-color="{{item}}" data-key="titleColor" bindtap="titleStyle" style="background:{{item}}" aria-label="{{colorNames[index]}}批注文字"><text wx:if="{{settings.titleColor === item}}">✓</text></button>
+        </view>
+        <view class="sub-block">
+          <button class="button small-action" data-type="caption" bindtap="sticker">＋ 加一张可拖动的文字便签</button>
+          <view class="field" wx:if="{{currentSticker && currentSticker.type === 'caption'}}">
+            <view class="field-label">便签内容 · 最多40字</view>
+            <textarea class="input caption-input" maxlength="40" value="{{currentSticker.text}}" bindinput="captionInput" bindblur="titleEnd" disabled="{{currentSticker.locked}}" aria-label="选中文字便签内容" />
+            <view class="field-label">便签字号 · {{currentSticker.fontSize}}</view>
+            <slider class="tone-slider" min="14" max="36" value="{{currentSticker.fontSize}}" data-key="fontSize" bindchange="stickerAdjust" activeColor="#ce8ba7" block-size="22" disabled="{{currentSticker.locked}}" aria-label="便签字号" />
+            <button class="brush-chip" bindtap="captionBackground" disabled="{{currentSticker.locked}}">{{currentSticker.background ? '✓ 奶油纸底 · 点击去掉' : '空心字 · 点击加纸底'}}</button>
+          </view>
+        </view>
+        <view class="sub-block">
+          <view class="field-label">页脚落款 · 留空可不显示</view>
+          <input class="input" maxlength="60" value="{{settings.footerText}}" bindinput="footerInput" bindblur="titleEnd" aria-label="作品页脚落款" />
+          <view class="date-row"><button class="text-btn" bindtap="toggleDate" disabled="{{settings.template === 'date'}}">{{settings.template === 'date' ? '日期模板 · 固定显示' : settings.showDate ? '✓ 日期已显示' : '＋ 显示日期'}}</button><picker mode="date" value="{{settings.date}}" bindchange="date" aria-label="作品日期"><view class="picker-input">{{settings.date}} ⌄</view></picker></view>
+          <view class="tiny">日期拍立得固定显示日期。字迹随设备字体回退。</view>
+        </view>
       </block>
 
       <block wx:elif="{{tool === '调色'}}">
         <view class="tool-title">把光调成喜欢的样子</view>
+        <view class="tone-presets"><button wx:for="{{tones}}" wx:key="id" class="tone-preset {{activeTone === item.id ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="tone" aria-label="{{item.name}}配色{{activeTone === item.id ? '，已选中' : ''}}"><view class="tone-swatch" style="background:{{item.color}}">{{activeTone === item.id ? '✓' : '◐'}}</view><text>{{item.name}}</text></button></view>
         <view class="tone-row"><text class="field-label">亮一点</text><text class="tone-value">{{settings.brightness}}%</text></view>
-        <slider
-          class="tone-slider"
-          min="50"
-          max="150"
-          value="{{settings.brightness}}"
-          activeColor="#ce8ba7"
-          backgroundColor="#efdfe6"
-          block-size="22"
-          block-color="#ce8ba7"
-          data-key="brightness"
-          bindchange="adjust"
-          aria-label="亮度"
-        />
+        <slider class="tone-slider" min="50" max="150" value="{{settings.brightness}}" data-key="brightness" bindchange="adjust" activeColor="#ce8ba7" block-size="22" aria-label="亮度" />
         <view class="tone-row"><text class="field-label">对比度</text><text class="tone-value">{{settings.contrast}}%</text></view>
-        <slider
-          class="tone-slider"
-          min="50"
-          max="150"
-          value="{{settings.contrast}}"
-          activeColor="#ce8ba7"
-          backgroundColor="#efdfe6"
-          block-size="22"
-          block-color="#ce8ba7"
-          data-key="contrast"
-          bindchange="adjust"
-          aria-label="对比度"
-        />
+        <slider class="tone-slider" min="50" max="150" value="{{settings.contrast}}" data-key="contrast" bindchange="adjust" activeColor="#ce8ba7" block-size="22" aria-label="对比度" />
         <view class="tone-row"><text class="field-label">色彩浓度</text><text class="tone-value">{{settings.saturation}}%</text></view>
-        <slider
-          class="tone-slider"
-          min="0"
-          max="200"
-          value="{{settings.saturation}}"
-          activeColor="#ce8ba7"
-          backgroundColor="#efdfe6"
-          block-size="22"
-          block-color="#ce8ba7"
-          data-key="saturation"
-          bindchange="adjust"
-          aria-label="色彩浓度"
-        />
-        <button class="button small-action" bindtap="cream">☀ 一键奶油光</button>
-        <view class="tiny">松手后画布才重算像素，拖动时不卡手。</view>
+        <slider class="tone-slider" min="0" max="200" value="{{settings.saturation}}" data-key="saturation" bindchange="adjust" activeColor="#ce8ba7" block-size="22" aria-label="色彩浓度" />
+        <view class="tiny">选择预设后仍可细调。滑杆松手后重算像素，保留原生与逐像素两条调色路径。</view>
       </block>
+    </view>
+
+    <view class="layer-drawer">
+      <button class="drawer-toggle" bindtap="toggleLayers" aria-label="{{layersOpen ? '收起' : '展开'}}图层小抽屉"><text>▤ 图层小抽屉 <text class="drawer-count">{{layers.length}} / 16</text></text><text>{{layersOpen ? '−' : '＋'}}</text></button>
+      <scroll-view wx:if="{{layersOpen}}" scroll-y class="layer-list" style="height:{{layers.length ? (layers.length > 4 ? 228 : layers.length * 50) : 48}}px">
+        <view class="tiny" wx:if="{{!layers.length}}">添加文字便签或贴纸后，在这里选择、排序。</view>
+        <button wx:for="{{layers}}" wx:key="id" class="layer-row {{item.selected ? 'selected' : ''}}" data-id="{{item.id}}" bindtap="selectLayer" aria-label="选择图层：{{item.name}}{{item.locked ? '，已锁定' : ''}}{{item.hidden ? '，已隐藏' : ''}}"><text class="layer-number">{{item.index + 1}}</text><text class="layer-name">{{item.name}}</text><text class="layer-state">{{item.locked ? '锁定' : ''}} {{item.hidden ? '隐藏' : ''}} {{item.selected ? '✓' : ''}}</text></button>
+      </scroll-view>
+      <view class="adjust-block" wx:if="{{currentSticker}}">
+        <view class="selection-label">正在编辑：{{currentSticker.type === 'caption' ? '文字便签' : '贴纸'}} <text>{{currentSticker.locked ? '已锁定' : currentSticker.hidden ? '已隐藏' : '可拖动'}}</text></view>
+        <view class="layer-switches">
+          <button class="brush-chip {{currentSticker.locked ? 'selected' : ''}}" data-action="lock" bindtap="layerAction">{{currentSticker.locked ? '解锁图层' : '锁住图层'}}</button>
+          <button class="brush-chip {{currentSticker.hidden ? 'selected' : ''}}" data-action="hide" bindtap="layerAction">{{currentSticker.hidden ? '显示图层' : '暂时隐藏'}}</button>
+        </view>
+        <block wx:if="{{!currentSticker.locked}}">
+          <view class="color-row" wx:if="{{currentSticker.type === 'caption' || currentSticker.type === 'flower' || currentSticker.type === 'washi'}}">
+            <button wx:for="{{colors}}" wx:key="*this" class="color-dot {{currentSticker.color === item ? 'selected' : ''}}" data-color="{{item}}" bindtap="layerColor" style="background:{{item}}" aria-label="{{colorNames[index]}}图层配色"><text wx:if="{{currentSticker.color === item}}">✓</text></button>
+          </view>
+          <view class="field-label">图层大小 · {{currentSticker.scale}} ×</view>
+          <slider class="tone-slider" min="0.5" max="2.5" step="0.05" value="{{currentSticker.scale}}" data-key="scale" bindchange="stickerAdjust" activeColor="#ce8ba7" block-size="22" aria-label="选中图层大小" />
+          <view class="field-label">转个方向 · {{currentSticker.rotation}}°</view>
+          <slider class="tone-slider" min="-180" max="180" value="{{currentSticker.rotation}}" data-key="rotation" bindchange="stickerAdjust" activeColor="#ce8ba7" block-size="22" aria-label="选中图层旋转角度" />
+          <view class="position-grid">
+            <view><view class="field-label">左右位置 · {{currentSticker.x}}</view><slider class="tone-slider" min="15" max="435" value="{{currentSticker.x}}" data-key="x" bindchange="stickerAdjust" activeColor="#ce8ba7" block-size="22" aria-label="图层左右位置" /></view>
+            <view><view class="field-label">上下位置 · {{currentSticker.y}}</view><slider class="tone-slider" min="15" max="485" value="{{currentSticker.y}}" data-key="y" bindchange="stickerAdjust" activeColor="#ce8ba7" block-size="22" aria-label="图层上下位置" /></view>
+          </view>
+          <view class="layer-actions">
+            <button class="brush-chip" data-action="duplicate" bindtap="layerAction" disabled="{{layers.length >= 16}}">复制一份</button>
+            <button class="brush-chip" data-action="up" bindtap="layerAction" disabled="{{layers[0].id === selectedId}}">上移一层 ↑</button>
+            <button class="brush-chip" data-action="down" bindtap="layerAction" disabled="{{layers[layers.length - 1].id === selectedId}}">下移一层 ↓</button>
+            <button class="brush-chip" data-action="center" bindtap="layerAction">居中放好</button>
+            <button class="brush-chip remove-layer" data-action="delete" bindtap="layerAction">移除图层</button>
+          </view>
+        </block>
+        <view wx:else class="tiny">已锁定：不会被拖动或删除。解锁后继续编辑。</view>
+      </view>
     </view>
 
     <view class="editor-save">
       <view class="feedback" wx:if="{{error}}" aria-role="alert">{{error}}</view>
       <button class="save-btn" loading="{{busy}}" disabled="{{busy || !ready}}" data-kind="album" bindtap="saveWork">{{busy ? '正在收好…' : '♡ 存进回忆相册'}}</button>
-      <button class="button png-action" disabled="{{busy || !ready}}" data-kind="device" bindtap="saveWork">▤ 导出 PNG · 存手机相册</button>
+      <button class="button png-action" disabled="{{busy || !ready}}" data-kind="device" bindtap="saveWork">▤ {{exportFormat === 1 ? 'JPG' : 'PNG'}} · 存手机相册</button>
+      <button class="drawer-toggle export-toggle" bindtap="toggleExport" disabled="{{busy}}"><text>导出设置 · {{exportSize === 1 ? '1350 × 1500' : '900 × 1000'}}</text><text>{{exportOpen ? '−' : '＋'}}</text></button>
+      <view class="export-options" wx:if="{{exportOpen}}">
+        <picker range="{{exportSizes}}" value="{{exportSize}}" data-key="exportSize" bindchange="exportOption" aria-label="导出分辨率"><view class="picker-input">{{exportSizes[exportSize]}} ⌄</view></picker>
+        <picker range="{{exportFormats}}" value="{{exportFormat}}" data-key="exportFormat" bindchange="exportOption" aria-label="导出图片格式"><view class="picker-input">{{exportFormats[exportFormat]}} ⌄</view></picker>
+        <view class="tiny">更清晰的尺寸会占用更多内存。PNG 保留无损细节；JPG 使用 92% 质量。不放大原照片的真实细节。</view>
+      </view>
       <view class="tiny">预览与导出共用同一张画布，编辑选框不会导出。</view>
     </view>
-  </view>
+  </view></view>
 
   <view class="section-title">还没写完的小心思 <text class="draft-count">{{drafts.length}}</text></view>
   <view class="draft-row paper-card" wx:for="{{drafts}}" wx:key="id">

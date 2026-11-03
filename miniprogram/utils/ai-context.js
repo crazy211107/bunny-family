@@ -35,7 +35,7 @@ const redact = (value) =>
     .replace(/\bBearer\s+[A-Za-z0-9_.-]{12,}/gi, "[凭据已隐藏]");
 const record = (value) => redact(JSON.stringify(value));
 const APP_GUIDE =
-  "应用目录：手账墙看照片放映、今日场记与待办，“今天的小小照顾”进入原生照顾打卡；照顾打卡复用档案四项记录，支持兔兔/状态筛选、单项记录与撤销、明确选择后批量记录、历史只读与复制小票；兔兔档案记录四项照顾、月历、体重和健康提醒；照顾日程安排一次/每天/每周/间隔计划与家人分工（仅今日可打卡），补给抽屉登记库存出入；家庭册管理成员关系与生日；小日子信笺写日记、标签、置顶及自动草稿；回忆相册有主题册、批量整理、回收站与放映；创意工坊有八模板、贴纸、画笔、调色、PNG导出；小电影只做视频预览/草稿，不合成MP4；照顾周记只统计过去日期，交接卡包含三天待办与用户说明。各页右上翻开目录导航，AI只有阅读和给建议的能力。";
+  "应用目录：手账墙看照片放映、今日场记与待办，“今天的小小照顾”进入原生照顾打卡；照顾打卡复用档案四项记录，支持兔兔/状态筛选、单项记录与撤销、明确选择后批量记录、历史只读与复制小票；兔兔档案记录四项照顾、月历、体重和健康提醒；照顾日程安排一次/每天/每周/间隔计划与家人分工（仅今日可打卡），补给抽屉登记库存出入；家庭册管理成员关系与生日；小日子信笺写日记、标签、置顶及自动草稿；回忆相册有主题册、批量整理、回收站与放映；创意工坊有十模板（含双联、三连拍、四格选图）、照片缩放取景/旋转/翻转、文字便签、六种贴纸、四笔刷、图层排序/锁定/隐藏、五配色预设与纸张换色、30步撤销和草稿恢复、PNG/JPG两档尺寸导出（900×1000、1350×1500），只在本机编辑，不自动生成图像；小电影只做视频预览/草稿，不合成MP4；照顾周记只统计过去日期，交接卡包含三天待办与用户说明。各页右上翻开目录导航，AI只有阅读和给建议的能力。";
 function buildRecords(state, includeContacts) {
   const data = {},
     pets = list(state.pets),
@@ -259,12 +259,30 @@ function buildRecords(state, includeContacts) {
       photoId: draft.photoId || "",
       photoSlots: ids(settings.photoSlots),
       secondaryId: settings.secondaryId || "",
+      composition: {
+        zoom: (settings.transform || {}).zoom,
+        x: (settings.transform || {}).x,
+        y: (settings.transform || {}).y,
+        rotation: (settings.transform || {}).rotation,
+        flipX: (settings.transform || {}).flipX === true,
+        flipY: (settings.transform || {}).flipY === true,
+      },
+      paper: text(settings.paper, 12),
+      slotComposition: list(settings.slotTransforms).slice(0, 4).map(t => t ? ({
+        zoom: t.zoom, x: t.x, y: t.y, rotation: t.rotation,
+        flipX: t.flipX === true, flipY: t.flipY === true,
+      }) : null),
+      footer: text(settings.footerText, 60),
+      date: text(settings.date, 10),
       adjustment: {
         brightness: settings.brightness,
         contrast: settings.contrast,
         saturation: settings.saturation,
       },
       stickers: list(settings.stickers).map((sticker) => ({
+        type: text(sticker.type, 20),
+        hidden: sticker.hidden === true,
+        locked: sticker.locked === true,
         text: text(sticker.text || sticker.symbol, 60),
         x: sticker.x,
         y: sticker.y,

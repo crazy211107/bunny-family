@@ -4,14 +4,14 @@ from zipfile import ZipFile, ZIP_DEFLATED
 import json
 
 root = Path(__file__).resolve().parent.parent
-output = root / "output" / "兔兔小窝-微信原生可爱手账-20261029.zip"
+output = root / "output" / "兔兔小窝-工坊增强原生版-20261030.zip"
 output.parent.mkdir(exist_ok=True)
 scripts = [
     "verify-miniprogram-pages.mjs", "verify-miniprogram.mjs",
-    "verify-family-features.mjs", "verify-ai.mjs", "verify-native-style.mjs", "verify-native-chat-ux.mjs",
+    "verify-family-features.mjs", "verify-ai.mjs", "verify-native-style.mjs", "verify-native-chat-ux.mjs", "verify-studio.mjs",
     "compile-native.mjs", "verify-ai-relay.mjs", "package-native.py",
 ]
-documents = ["原生可爱风格校正.md", "兔兔小窝-主提示词.md", "AI助手-提示词与接入说明.md", "豆伴对话栏与连续会话修正.md", "豆伴可用性审计与修复.md"]
+documents = ["原生可爱风格校正.md", "兔兔小窝-主提示词.md", "AI助手-提示词与接入说明.md", "豆伴对话栏与连续会话修正.md", "豆伴可用性审计与修复.md", "豆伴AI-整体视觉升级.md", "豆伴AI-design-tokens.json", "创意工坊-穿层修复与功能升级.md"]
 files = [path for path in (root / "miniprogram").rglob("*") if path.is_file()]
 files += [root / "scripts" / name for name in scripts]
 files += [root / "docs" / name for name in documents]
@@ -21,7 +21,8 @@ files += [root / "project.config.json", root / ".gitignore"]
 package = {
     "name": "bunny-family-native", "version": "1.0.0", "private": True, "type": "module",
     "scripts": {
-        "verify:miniprogram": " && ".join("node scripts/" + name for name in scripts[:6]),
+        "verify:miniprogram": " && ".join("node scripts/" + name for name in scripts[:7]),
+        "verify:studio": "node scripts/verify-studio.mjs",
         "verify:chat-ux": "node scripts/verify-native-chat-ux.mjs",
         "verify:product": "node scripts/verify-native-style.mjs",
         "verify:native-compile": "node scripts/compile-native.mjs",
@@ -42,6 +43,12 @@ AI 需配置自己的兼容服务；可选中转说明见 server/README.md，未
 豆伴顶部固定新对话，历史/资料/连接集中到更多；同一会话最多携带十五轮文字，在更多中统一预览。
 回到最新按钮浮在独立消息区内，显隐不挤压布局；新建保留草稿，加载更早消息可保持阅读位置。
 长对话会节选；附图仅保留文字，不自动重传原图。详见 docs/豆伴对话栏与连续会话修正.md。
+
+2026-10-30 豆伴升级：四个原生界面、会话搜索、轻量摘要、重新回答、设置分组与固定保存栏。
+图标取自 Phosphor，许可随 assets/ai-icons/LICENSE.txt 分发；详见 docs/豆伴AI-整体视觉升级.md。
+
+本包包含本轮工坊增强：目录/豆伴打开前先卸载原生画布、关闭恢复；十模板、逐镜头构图、文字便签、图层抽屉、配色/信纸、PNG/JPG两档导出。
+新增15组工坊行为检查；详见 docs/创意工坊-穿层修复与功能升级.md。微信侧需完整编译，再确认目录开合与相册保存。
 
 详见 docs/原生可爱风格校正.md 与 docs/兔兔小窝-主提示词.md。
 安装 Node.js 22+ 后可运行 npm run verify:miniprogram；本机编译运行 npm run verify:native-compile。

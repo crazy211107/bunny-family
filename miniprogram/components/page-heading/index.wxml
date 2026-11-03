@@ -1,0 +1,8 @@
+<view class="heading">
+  <text wx:if="{{eyebrow}}" class="eyebrow">{{eyebrow}}</text>
+  <view class="heading-line">
+    <text class="heading-title" aria-role="heading">{{title}}</text>
+    <button wx:if="{{action}}" class="primary" hover-class="primary-pressed" loading="{{busy}}" disabled="{{busy || disabled}}" aria-label="{{action}}" bindtap="primary">{{action}}</button>
+  </view>
+  <text wx:if="{{description}}" class="description">{{description}}</text>
+</view>

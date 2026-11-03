@@ -1,29 +1,19 @@
 <page-top />
 <view class="page home-page">
   <view class="home-heading">
-    <view>
-      <view class="title">我们家 ♡</view>
-      <view class="title-line"></view>
-    </view>
-    <view class="date-note">
-      <view class="pin"></view>
-      <text>{{year}} 年</text>
-      <view>{{month}} / {{day}}</view>
-      <text>星期{{weekday}} · 宜贴贴 ☀</text>
-    </view>
+    <view class="home-heading-copy"><text class="home-eyebrow">OUR LITTLE DAYS · 家庭映画手账</text><view class="title">我们家 ♡</view><text class="home-intro">小日子，值得慢慢珍藏。</text></view>
+    <view class="date-note"><text>{{year}} · {{month}}</text><view>{{day}}</view><text>星期{{weekday}}</text></view>
   </view>
 
-  <view class="home-care-ticket" bindtap="goDailyCare" hover-class="home-care-ticket-pressed" aria-role="button" aria-label="翻开今日照顾打卡，已记录{{basicDone}}项，共{{basicTotal}}项">
-    <view class="home-care-ticket-mark">♡</view><view class="home-care-ticket-copy"><text>今天的小小照顾</text><text>已记 {{basicDone}} / {{basicTotal}} 项 · 每一份细心都算数</text></view><view class="home-care-ticket-open"><text>翻开照顾本</text><text>↗</text></view>
-  </view>
+
   <view class="hero-stack">
    <view class="hero-underlay"></view>
    <view class="hero-paper">
     <view class="tape"></view>
     <view class="film-holes left"></view>
     <view class="film-holes right"></view>
-    <view wx:if="{{hero}}" class="hero-frame" bindtap="preview">
-      <image class="hero-photo" src="{{hero.src}}" mode="aspectFill" />
+    <view wx:if="{{hero}}" class="hero-frame" bindtap="preview" aria-role="button" aria-label="预览照片：{{hero.title}}">
+      <image class="hero-photo" src="{{hero.src}}" mode="aspectFill" /><text class="hero-reel-label">正在放映 · 家里的可爱片段</text>
       <view class="hero-frame-line"></view>
       <text class="hero-no">NO.{{slide + 1}} / {{photos.length}}</text>
     </view>
@@ -52,14 +42,10 @@
    </view>
   </view>
 
-  <view class="opening">
-    <view class="opening-copy">
-      <text class="opening-line">小日子，慢慢放映。</text>
-      <text class="opening-sub">两只兔兔，一屋子的可爱。</text>
-    </view>
-    <view class="opening-action" bindtap="openJournal" hover-class="opening-action-hover" aria-role="button">
-      <text>翻开今日手账</text><text class="opening-heart">♡</text>
-    </view>
+  <view class="opening"><view class="opening-copy"><text class="opening-line">今天也有小美好</text><text class="opening-sub">一张照片，一句心情，都是我们的日常。</text></view><button class="opening-action" bindtap="openJournal" hover-class="opening-action-hover" aria-label="翻开今日手账">记下今天 <text>✎</text></button></view>
+  <view class="home-summary" aria-label="本机生活记录"><view><text>{{photos.length}}</text><text>帧回忆</text></view><view><text>{{notes.length}}</text><text>篇今日手账</text></view><view><text>{{basicDone}}<text> / {{basicTotal}}</text></text><text>项今日照顾</text></view></view>
+  <view class="home-care-ticket" bindtap="goDailyCare" hover-class="home-care-ticket-pressed" aria-role="button" aria-label="翻开今日照顾打卡，已记录{{basicDone}}项，共{{basicTotal}}项">
+    <view class="home-care-ticket-mark">♡</view><view class="home-care-ticket-copy"><text>今天的小小照顾</text><text>已记 {{basicDone}} / {{basicTotal}} 项 · 每一份细心都算数</text></view><view class="home-care-ticket-open"><text>翻开照顾本</text><text>↗</text></view>
   </view>
 
   <view class="memory-on-this-day" wx:if="{{memory.length}}">
@@ -76,13 +62,13 @@
     <text class="otd-note">同一天，不同的可爱。点开看看那时的你们。</text>
   </view>
 
-  <view class="section-row"><text>两位小主，今日营业中</text><text>♡</text></view>
+  <view class="section-row"><view><text class="section-kicker">THE LITTLE CAST</text><text class="home-section-title">小主，今日营业中</text></view><text class="section-flower" aria-hidden="true">✿</text></view>
 
   <view class="pet-grid">
     <view class="pet-slip" wx:for="{{pets}}" wx:key="id" data-id="{{item.id}}" bindtap="pet" hover-class="pet-slip-hover" aria-role="button">
       <image class="slip-photo" src="{{item.photo}}" mode="aspectFill" />
       <view class="slip-veil"></view>
-      <text class="slip-name">{{item.name}} ♡</text>
+      <view class="slip-number" aria-hidden="true">0{{index + 1}}</view><text class="slip-name">{{item.name}} <text>↗</text></text>
       <view class="slip-dots">
         <view class="slip-dot {{dotIndex < item.count ? 'on' : ''}}" wx:for="{{[0,1,2,3]}}" wx:for-item="dot" wx:for-index="dotIndex" wx:key="*this"></view>
       </view>
@@ -91,8 +77,8 @@
   </view>
 
   <view class="care-doors">
-    <view class="care-door-main" bindtap="goCare" hover-class="door-pressed" aria-role="button" aria-label="查看照顾日程，今日{{planLeft}}项待做"><text class="door-eyebrow">FAMILY CARE CLUB</text><view>今天，谁来照顾？<text>↗</text></view><text>{{planCount ? '今日 '+planCount+' 项计划 · '+planLeft+' 项待做' : '写一张便签，和家人轮流上场'}}</text></view>
-    <view class="care-door-side" bindtap="goInsights" hover-class="door-pressed" aria-role="button" aria-label="翻开照顾周记与交接卡"><text>♡</text><view>照顾周记</view><text>把认真做过的小事装订起来 ↗</text></view>
+    <view class="care-door-main" bindtap="goCare" hover-class="door-pressed" aria-role="button" aria-label="查看照顾日程，今日{{planLeft}}项待做"><text class="door-eyebrow">01 / 家人接力</text><view>今天，谁来照顾？<text>↗</text></view><text>{{planCount ? '今日 '+planCount+' 项计划 · '+planLeft+' 项待做' : '写一张便签，和家人轮流上场'}}</text></view>
+    <view class="care-door-side" bindtap="goInsights" hover-class="door-pressed" aria-role="button" aria-label="翻开照顾周记与交接卡"><text class="door-eyebrow">02 / 周末翻一翻</text><view>照顾周记 <text>↗</text></view><text>把认真做过的小事装订起来 ↗</text></view>
   </view>
   <view wx:if="{{lowCount}}" class="low-supply-note" bindtap="goSupplies" hover-class="door-pressed" aria-role="button"><text>✧ 有 {{lowCount}} 件用品等补给</text><text>看看小抽屉 →</text></view>
 
@@ -109,7 +95,7 @@
         <text class="line-note" wx:if="{{item.note}}">{{item.note}}</text>
       </view>
       <text class="line-due" wx:if="{{item.kind === 'reminder'}}">{{item.dueText}}</text>
-      <view class="line-remove" wx:if="{{item.kind === 'todo'}}" data-id="{{item.id}}" catchtap="removeTodo" aria-role="button">×</view>
+      <view class="line-remove" wx:if="{{item.kind === 'todo'}}" data-id="{{item.id}}" catchtap="removeTodo" aria-role="button" aria-label="移除待办">×</view>
     </view>
     <view wx:if="{{!todayList.length}}" class="tiny todo-empty">今天没有要记得的事，和兔兔发会儿呆。</view>
     <view wx:if="{{todayListCount > 6}}" class="text-btn" bindtap="goCare" aria-role="button">先列眼前六件 · 全部照顾计划到日程页查看 ↗</view>
@@ -121,7 +107,7 @@
 
   <view class="row memory-heading">
     <view>
-      <text class="tiny">little things, big love</text>
+      <text class="section-kicker">THE MEMORY REEL</text>
       <view class="section-title">捡来的小美好 ♡</view>
     </view>
     <view class="text-btn" bindtap="goAlbum">摊开回忆 →</view>
@@ -130,7 +116,7 @@
     <view class="film-rail">
       <view class="film-frame" wx:for="{{photos}}" wx:key="id" data-id="{{item.id}}" bindtap="preview">
         <view class="sprocket top"></view>
-        <view class="film-window"><image src="{{item.src}}" mode="aspectFill" /><text class="film-index">{{index + 1}}</text></view>
+        <view class="film-window"><image src="{{item.src}}" mode="aspectFill" lazy-load /><text class="film-index">{{index + 1}}</text></view>
         <text class="film-title">{{item.title}}</text>
         <view class="sprocket bottom"></view>
       </view>

@@ -1,6 +1,7 @@
 {
   "usingComponents": {
     "empty-state": "/components/empty-state/index",
-    "search-bar": "/components/search-bar/index"
+    "search-bar": "/components/search-bar/index",
+    "page-heading": "/components/page-heading/index"
   }
 }

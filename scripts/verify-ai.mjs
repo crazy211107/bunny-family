@@ -125,6 +125,11 @@ await check('主动停止立即取消，迟到回调不能写成完整回答', a
 await check('安全 Markdown 仅文本，不执行模型 HTML 与链接', () => {
   const blocks = markdown.blocks('# 标题\n- 一件小事\n<script>never execute</script>\n```js\nalert(1)\n```');
   assert.ok(blocks.some(block => block.type === 'heading')); assert.ok(blocks.some(block => block.type === 'code')); assert.ok(blocks.every(block => typeof block.text === 'string' && !block.html));
+  assert.equal(blocks.find(block => block.type === 'code').language, 'js');
+  const partial = markdown.blocks('```typescript\nconst note = "<script>";');
+  assert.equal(partial[0].language, 'typescript');
+  assert.equal(partial[0].text, 'const note = "<script>";');
+  assert.equal(markdown.blocks('```<img/onerror=alert(1)>\nnever execute\n```')[0].html, undefined);
 });
 await check('更换兔兔档案照：取消不修改；选相册照片后保存，同步数据源', async () => {
   store.save({ ...store.initial(), carePlans: [], planLogs: {}, supplies: [], albums: [], handover: {} });

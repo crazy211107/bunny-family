@@ -2,6 +2,7 @@
    base        基础层（页面、字号、排版工具）
    components  组件层（纸卡、按钮、单元格、表单、抽屉）
    responsive  适配层（窄屏/宽屏、减少动效） */
+@import "styles/tokens.wxss";
 @import "styles/base.wxss";
 @import "styles/components.wxss";
 @import "styles/responsive.wxss";

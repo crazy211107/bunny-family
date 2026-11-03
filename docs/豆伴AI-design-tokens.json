@@ -1,0 +1,56 @@
+{
+  "name": "豆伴 · 小窝信笺",
+  "surface": "WeChat native component",
+  "version": "2026-10-30",
+  "colors": {
+    "paper": "#fff9f0",
+    "surface": "#fffdf8",
+    "ink": "#6b5b73",
+    "secondary": "#756272",
+    "line": "#e2d1da",
+    "pink": "#ffd9e8",
+    "mint": "#c9e7d3",
+    "action": "#875873"
+  },
+  "typography": {
+    "bodyPx": 14,
+    "wideBodyPx": 15,
+    "secondaryPx": 11,
+    "titlePx": 26,
+    "headerPx": 17,
+    "display": "YouYuan, STKaiti, KaiTi, serif",
+    "body": "system sans-serif; PingFang SC / Microsoft YaHei"
+  },
+  "spacingPx": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32
+  ],
+  "radiiPx": {
+    "field": 9,
+    "control": 12,
+    "message": 16,
+    "composer": 19
+  },
+  "interaction": {
+    "minTouchPx": 44,
+    "transitionMs": 120,
+    "reducedMotion": "No transition; static waiting dot"
+  },
+  "layout": {
+    "phoneBreakpointPx": 350,
+    "wideBreakpointPx": 700,
+    "readingMaxWidthPx": 720,
+    "headerMinHeightPx": 60,
+    "layer": {
+      "launcher": 950,
+      "chat": 1300,
+      "headerWithinChat": 3,
+      "menuWithinHeader": 4
+    }
+  }
+}

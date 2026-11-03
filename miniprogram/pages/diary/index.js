@@ -12,6 +12,7 @@ const hasContent = (form) =>
 Page({
   data: {
     pageError: "",
+    showFilters: false,
     today: "",
     query: "",
     dateFilter: "",
@@ -34,6 +35,9 @@ Page({
     tagCloud: [],
     pendingDraft: null,
     draftStatus: "",
+  },
+  toggleFilters() {
+    this.setData({ showFilters: !this.data.showFilters });
   },
   onLoad(options) {
     this._initial = options || {};

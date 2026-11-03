@@ -9,6 +9,7 @@ const petIdsFor = (photo, pets) =>
 Page({
   data: {
     pageError: "",
+    showFilters: false,
     today: "",
     query: "",
     filter: "all",
@@ -44,6 +45,9 @@ Page({
     theaterPhoto: null,
     theaterTotal: 0,
     theaterPlaying: true,
+  },
+  toggleFilters() {
+    this.setData({ showFilters: !this.data.showFilters });
   },
   onLoad() {},
   onShow() {

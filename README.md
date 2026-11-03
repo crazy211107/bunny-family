@@ -4,6 +4,7 @@
 
 白兔叫豆米，黄兔叫豆糕。严格保留奶油白 #FFF9F0、樱花粉 #FFD9E8、薄荷绿 #C9E7D3、奶油黄 #FFE9A8、可可紫 #6B5B73，手写标题、拍立得、胶带、胶片与故事目录；不改成 SaaS 网站或商务后台。
 
+- [豆伴 AI 整体视觉升级](docs/豆伴AI-整体视觉升级.md)
 - [唯一主提示词](docs/兔兔小窝-主提示词.md)
 - [本次原生与风格校正](docs/原生可爱风格校正.md)
 - [AI 提示词与接入](docs/AI助手-提示词与接入说明.md)
@@ -155,3 +156,11 @@ npm run verify:ai-relay                 # 47 项回环假上游检查，不接�
 小程序版：`miniprogram/utils/store.js` 承担网页版 `data.js` + `media.jsx` 的职责（资料在 Storage、媒体在 `USER_DATA_PATH`）；`miniprogram/utils/painter.js` 对应网页 `painter.js`；`pages/studio` 对应 `PhotoWorkshop.jsx` + `editorHistory.js`；`pages/pets` 内含照顾月历；`components/bunny-menu` 对应 `App.jsx` 的兔耳菜单与故事目录。
 
 最终交付包排除 node_modules，以便移交。素材为用户上传照片，请仅用于授权的家庭项目。
+
+
+## 2026-10-30 · 原生工坊增强
+
+修复工坊画布穿到故事目录上：浮层打开前确认画布卸载，关闭后保留编辑参数重新加载。
+工坊新增双联/三连模板、逐镜头构图、文字便签、图层复制/排序/锁定/隐藏、五配色预设、纸张和落款设置，以及PNG/JPG两档尺寸导出。
+`npm run verify:studio` 验证15组隔离行为；`npm run verify:miniprogram` 包含工坊回归；`npm run verify:native-compile` 编译原生模板/样式。
+详见 [创意工坊升级记录](docs/创意工坊-穿层修复与功能升级.md)。离线样张不等于微信模拟器/真机验收，微信侧需完整编译后验证目录开合与相册导出。

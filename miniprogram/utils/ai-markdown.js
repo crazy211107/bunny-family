@@ -3,15 +3,19 @@
 function blocks(content) {
   const result = [];
   let code = null;
+  let language = "";
   String(content || "")
     .replace(/\r\n/g, "\n")
     .split("\n")
     .forEach((line) => {
       if (/^\s*```/.test(line)) {
         if (code) {
-          result.push({ type: "code", text: code.join("\n") });
+          result.push({ type: "code", text: code.join("\n"), language });
           code = null;
-        } else code = [];
+        } else {
+          code = [];
+          language = line.trim().slice(3).trim().split(/\s+/)[0].replace(/[^a-zA-Z0-9_+#.-]/g, "").slice(0, 24);
+        }
         return;
       }
       if (code) {
@@ -34,7 +38,7 @@ function blocks(content) {
       else if (quote) result.push({ type: "quote", text: quote[1] });
       else result.push({ type: "paragraph", text: line });
     });
-  if (code) result.push({ type: "code", text: code.join("\n") });
+  if (code) result.push({ type: "code", text: code.join("\n"), language });
   // 连续普通行合并，极长列表尾部收为同一文本块，保留全部文字并控制渲染节点数。
   const compact = [];
   result.forEach((item) => {

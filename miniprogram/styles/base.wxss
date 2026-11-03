@@ -9,7 +9,7 @@
 page {
   background: #fff9f0;
   color: #6b5b73;
-  font-family: "YouYuan", "Microsoft YaHei", sans-serif;
+  font-family: var(--font-body);
   font-size: 28rpx;
   line-height: 1.65;
 }
@@ -21,7 +21,7 @@ page::before {
   inset: 0;
   pointer-events: none;
   z-index: -1;
-  opacity: .12;
+  opacity: .035;
   background-image: radial-gradient(#a9928c 1rpx, transparent 1rpx);
   background-size: 13rpx 15rpx;
 }
@@ -53,11 +53,11 @@ input, textarea { color: #6b5b73; font-family: inherit; }
 
 /* ---------- 标题 ---------- */
 .title {
+  font-family: var(--font-display);
   font-size: 46rpx;
   font-weight: 600;
   letter-spacing: 2rpx;
   line-height: 1.45;
-  transform: rotate(-2deg);
 }
 .title-line {
   width: 268rpx;
@@ -74,6 +74,7 @@ input, textarea { color: #6b5b73; font-family: inherit; }
   color: #806c7b;
 }
 .section-title {
+  font-family: var(--font-display);
   margin: 14rpx 0;
   font-size: 30rpx;
   font-weight: 500;

@@ -2,11 +2,15 @@ const store = require('../../utils/store');
 
 Page({
   data: {
+    managing: false,
     members: [], drawerVisible: false, drawerTitle: '', editingId: '', today: '', birthdayCount: 0, formError: '',
     form: { name: '', role: '', birthday: '', avatar: '', relationTo: '', relation: '' },
     relationOptions: [], relationIndex: 0, relationName: '先不关联', avatarBusy: false,
   },
 
+  toggleManaging() {
+    this.setData({ managing: !this.data.managing });
+  },
   onLoad() { this.setData({ today: store.date() }); this._avatarToken = 0; this._pendingAvatars = []; },
   onShow() { this.setData({ safeTop: getApp().globalData.safeTop || 64 }); this.refresh(); },
   onUnload() { this.discardPendingAvatars(); this._avatarToken++; },

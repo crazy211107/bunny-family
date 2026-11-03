@@ -60,7 +60,7 @@ await check("新对话只保留一个顶部入口，返回/更多独立，重复
   const source = fs.readFileSync(path.join(root, "components/ai-assistant/index.wxml"), "utf8");
   assert.equal((source.match(/id="ai-new-chat"/g) || []).length, 1);
   assert.match(source, /id="ai-new-chat"[^>]*catchtap="newChat"/);
-  assert.match(source, /class="ai-back"[^>]*aria-label="返回"/);
+  assert.match(source, /class="ai-back(?:\s[^\"]*)?"[^>]*aria-label="返回"/);
   assert.match(source, /id="ai-more"[^>]*aria-label="更多对话选项"/);
   assert.ok(!source.includes('class="ai-toolbar"') && !source.includes('class="ai-privacy"'));
   assert.ok(!source.includes('class="ai-context-strip"') && !source.includes('class="ai-first-use"'));
@@ -68,7 +68,8 @@ await check("新对话只保留一个顶部入口，返回/更多独立，重复
   const css = fs.readFileSync(path.join(root, "components/ai-assistant/index.wxss"), "utf8");
   assert.match(css, /\.ai-new-chat\s*\{[^}]*min-height:\s*44px/);
   assert.match(css, /\.ai-send\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/);
-  assert.ok(css.includes("button:focus-visible"));
+  assert.ok(css.includes(".ai-btn:focus-visible"));
+  assert.ok(!css.includes("[disabled]"), "原生组件禁用样式使用显式状态class");
 });
 await check("已有会话新建时保存草稿；切回原会话恢复，未发送草稿也可找回", () => {
   const c = mount(), oldId = seed(c);
@@ -140,7 +141,7 @@ await check("回到最新后程序滚动不被当成上滑，连续回调不反�
 });
 await check("最新按钮脱离布局流，消息区有独立边界，切换提示不改变头尾布局", () => {
   const wxml = fs.readFileSync(path.join(root, "components/ai-assistant/index.wxml"), "utf8");
-  assert.match(wxml, /class="ai-conversation"/);
+  assert.match(wxml, /class="ai-conversation(?:\s[^\"]*)?"/);
   const css = fs.readFileSync(path.join(root, "components/ai-assistant/index.wxss"), "utf8");
   assert.match(css, /\.ai-conversation\s*\{[^}]*flex:\s*1[^}]*min-height:\s*0/);
   assert.match(css, /\.ai-conversation \.ai-latest\s*\{[^}]*position:\s*absolute/);
@@ -184,5 +185,45 @@ await check("更多菜单、返回目的地与上下文折叠各司其职，不�
   c.togglePreview({ currentTarget: { dataset: { field: "previewHistoryOpen" } } }); assert.equal(c.data.previewHistoryOpen, true);
   c.backPreview(); c.navigateBack(); assert.equal(c.data.screen, "history");
   c.navigateBack(); assert.equal(c.data.opened, false); unmount(c);
+});
+await check("会话搜索覆盖标题与最近消息，清空后可找回原会话和未发送草稿", () => {
+  const c = mount(), originalId = seed(c);
+  c._session.title = "豆米的照顾安排";
+  c._session.messages.at(-1).content = "核对牧草与饮水";
+  c.inputQuestion(event("这段草稿要保留")); c.newChat(); c.openHistory();
+  const all = c.data.sessions.length;
+  c.searchHistory(event("  牧草  "));
+  assert.equal(c.data.visibleSessions.length, 1);
+  assert.equal(c.data.visibleSessions[0].id, originalId);
+  assert.equal(c.data.sessions.length, all);
+  assert.ok(c.data.sessions.every((item) => !Object.hasOwn(item, "messages")));
+  c.searchHistory(event("完全不存在的词")); assert.equal(c.data.visibleSessions.length, 0);
+  c.clearHistorySearch(); assert.equal(c.data.visibleSessions.length, all);
+  c.openSession({ currentTarget: { dataset: { id: originalId } } });
+  assert.equal(c.data.question, "这段草稿要保留");
+  assert.equal(c._session.messages.at(-1).content, "核对牧草与饮水"); unmount(c);
+});
+await check("完成回答可重新生成，仅替换最后一问答；附图会话不会误重传", () => {
+  const c = mount(); seed(c, 6);
+  assert.equal(c.data.messages.at(-1).regeneratable, true);
+  assert.equal(c.data.messages[1].regeneratable, false);
+  let sent; c.startQuestion = (question, history) => { sent = { question, history }; };
+  c.retry(); assert.equal(sent.history.length, 4);
+  assert.equal(sent.question, c._session.messages[4].content);
+  c._session.messages[4].content += "\n[附图：old.jpg]";
+  c.renderSession(true); assert.equal(c.data.messages.at(-1).regeneratable, false);
+  sent = null; c.retry(); assert.equal(sent, null); assert.match(c.data.error, /重新选择图片/);
+  unmount(c);
+});
+await check("资料授权默认折叠，范围计数随选择变化，展开收起不改授权", () => {
+  const c = mount(); seed(c); c.openSettings();
+  assert.equal(c.data.scopesOpen, false);
+  const original = copy(c.data.form.scopes), n = c.data.formScopeCount;
+  c.toggleScopes(); c.toggleScopes(); assert.deepEqual(c.data.form.scopes, original);
+  const first = c.data.scopeRows.find((item) => item.selected);
+  c.toggleScope({ currentTarget: { dataset: { id: first.id } } });
+  assert.equal(c.data.formScopeCount, n - 1);
+  c.toggleScope({ currentTarget: { dataset: { id: first.id } } });
+  assert.equal(c.data.formScopeCount, n); unmount(c);
 });
 console.log(`\n✓ ${count} 组原生对话可用性回归通过；内存桩与静态约束，不替代模拟器命中/读屏/帧率验收。`);

@@ -30,3 +30,5 @@
 .empty-action-hover {
   transform: scale(.97);
 }
+
+.empty-state{display:flex;flex-direction:column;align-items:center;padding:36rpx 24rpx 30rpx}.empty-illustration{position:relative;display:flex;align-items:center;justify-content:center;width:110rpx;height:106rpx;margin-bottom:19rpx;background:#f5e9ed;border-radius:48% 52% 45% 55%;border:1rpx solid #e4cfda}.empty-illustration image{width:58rpx;height:62rpx}.empty-illustration>text{position:absolute;right:-3rpx;bottom:4rpx;color:#a8798f;font-size:25rpx}.empty-text{font-size:14px;font-weight:500;color:#6b5b73}.empty-sub{font-size:12px;max-width:500rpx}.empty-action{min-height:44px;font-size:13px;line-height:1.5}.empty-action::after{border:0}.empty-action:focus{outline:2px solid #875873;outline-offset:3px}

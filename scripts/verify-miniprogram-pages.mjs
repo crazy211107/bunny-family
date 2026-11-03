@@ -125,7 +125,8 @@ for (const name of pageNames) {
 }
 
 console.log("组件");
-for (const name of ["page-top", "bunny-menu", "bunny-mark", "empty-state", "search-bar", "ai-assistant"]) {
+const componentNames = ["page-top", "page-heading", "bunny-menu", "bunny-mark", "empty-state", "search-bar", "ai-assistant"];
+for (const name of componentNames) {
   captured = {};
   const file = path.join(root, "components", name, "index.js");
   try {
@@ -211,4 +212,4 @@ if (failures.length) {
   console.error(`\n✗ ${failures.length} 项装载失败`);
   process.exit(1);
 }
-console.log(`\n✓ ${pageNames.length} 个页面 / 6 个组件 / app 全部装载通过`);
+console.log(`\n✓ ${pageNames.length} 个页面 / ${componentNames.length} 个组件 / app 全部装载通过`);

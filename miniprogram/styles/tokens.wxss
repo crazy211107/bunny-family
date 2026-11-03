@@ -1,0 +1,26 @@
+/* 家庭映画手账。基础值 → 语义 token；不向豆伴组件注入业务布局。 */
+page {
+  --paper: #fff9f0;
+  --surface: #fffdf8;
+  --surface-inset: #f6eee7;
+  --ink: #6b5b73;
+  --ink-secondary: #806c7b;
+  --ink-action: #875873;
+  --line: #e2d1da;
+  --pink: #ffd9e8;
+  --mint: #c9e7d3;
+  --butter: #ffe9a8;
+  --success-ink: #42654d;
+  --warning-ink: #795a2c;
+  --danger-ink: #963e61;
+  --font-body: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-display: "YouYuan", "STKaiti", "KaiTi", serif;
+  --radius-control: 16rpx;
+  --radius-card: 24rpx;
+  --shadow-paper: 0 5rpx 0 #6b5b7306, 0 12rpx 30rpx #6b5b7306;
+  --space-1: 8rpx;
+  --space-2: 16rpx;
+  --space-3: 24rpx;
+  --space-4: 32rpx;
+  --space-5: 48rpx;
+}

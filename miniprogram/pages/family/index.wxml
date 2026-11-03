@@ -1,8 +1,8 @@
 <page-top />
 <view class="page family-page">
-  <view class="family-heading"><text class="page-eyebrow">02 / 一家人的小小剧组</text><text class="title">我们家的出场名单 ♡</text><text class="subtitle">陪在一起的人，都有一个专属位置。</text></view>
-  <view class="family-opening"><text class="family-opening-mark">♡</text><view><text class="family-opening-title">一家人，就是最好的剧组。</text><text>本机家庭册 · {{members.length}} 位家人 · {{birthdayCount}} 个生日</text></view><text class="family-opening-stamp">HOME</text></view>
-  <button class="button pink family-add" bindtap="openEditor">＋ 请一位家人入镜</button>
+  <page-heading eyebrow="02 / 一家人的小小剧组" title="我们家的出场名单" description="陪在一起的人，都有一个专属位置。" action="＋ 家人" bind:primary="openEditor" />
+  <view class="family-opening"><view class="family-opening-mark" aria-hidden="true">♡</view><view><text class="family-opening-title">一家人，就是最好的剧组。</text><text>{{members.length}} 位家人 · 已记下 {{birthdayCount}} 个生日</text></view></view><view wx:if="{{members.length}}" class="roster-toolbar"><text>本机家庭册</text><button bindtap="toggleManaging" aria-expanded="{{managing}}">{{managing ? '完成整理 ✓' : '排序与整理'}}</button></view>
+
 
   <view wx:if="{{members.length}}" class="family-timeline">
     <view wx:for="{{members}}" wx:key="id" class="family-member-wrap">
@@ -12,7 +12,7 @@
         <view class="family-member-top"><view class="family-avatar"><image wx:if="{{item.avatar}}" src="{{item.avatar}}" mode="aspectFill" /><text wx:else="">{{item.initial}}</text></view><view class="family-name"><text>{{item.name}} ♡</text><text class="family-role">{{item.role}}</text></view><button class="family-edit" data-id="{{item.id}}" bindtap="openEditor" aria-label="编辑{{item.name}}">✎</button></view>
         <view class="family-birthday {{item.birthdayToday ? 'is-today' : ''}}"><text>☀ {{item.birthdayCaption}}</text><text wx:if="{{item.birthday}}">{{item.birthday}}</text></view>
         <view wx:if="{{item.relationCaption}}" class="family-relation">✉ {{item.relationCaption}}</view>
-        <view class="family-member-footer"><view class="family-order"><button data-id="{{item.id}}" data-delta="-1" disabled="{{!item.canUp}}" bindtap="moveMember" aria-label="将{{item.name}}向前排序">↑ 向前</button><button data-id="{{item.id}}" data-delta="1" disabled="{{!item.canDown}}" bindtap="moveMember" aria-label="将{{item.name}}向后排序">↓ 向后</button></view><button class="family-remove" data-id="{{item.id}}" bindtap="deleteMember" aria-label="删除成员{{item.name}}">收起资料</button></view>
+        <view wx:if="{{managing}}" class="family-member-footer"><view class="family-order"><button data-id="{{item.id}}" data-delta="-1" disabled="{{!item.canUp}}" bindtap="moveMember" aria-label="将{{item.name}}向前排序">↑ 向前</button><button data-id="{{item.id}}" data-delta="1" disabled="{{!item.canDown}}" bindtap="moveMember" aria-label="将{{item.name}}向后排序">↓ 向后</button></view><button class="family-remove" data-id="{{item.id}}" bindtap="deleteMember" aria-label="删除成员{{item.name}}">收起资料</button></view>
       </view>
     </view>
   </view>

@@ -4,6 +4,7 @@ const aiClient = require("../../utils/ai-client");
 const aiMedia = require("../../utils/ai-media");
 const store = require("../../utils/store");
 const markdown = require("../../utils/ai-markdown");
+const overlays = require("../../utils/overlay");
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const now = () => new Date().toISOString();
@@ -56,7 +57,7 @@ Component({
     canSend: false,
     hiddenMessages: 0,
     newerMessages: 0,
-    collapsed: false,
+    collapsed: true,
     screen: "chat",
     returnScreen: "chat",
     floatX: 0,
@@ -69,6 +70,10 @@ Component({
     title: "新的小窝对话",
     messages: [],
     sessions: [],
+    visibleSessions: [],
+    historyQuery: "",
+    scopesOpen: false,
+    formScopeCount: 0,
     question: "",
     running: false,
     testing: false,
@@ -120,6 +125,7 @@ Component({
         wx.onKeyboardHeightChange(this._keyboardHandler);
     },
     detached() {
+      overlays.close(this);
       this.halt("已离开页面，回答已停止。");
       this._alive = false;
       try {
@@ -139,6 +145,7 @@ Component({
   pageLifetimes: {
     show() {
       this._visible = true;
+      if (this.data.opened) overlays.open(this);
       this.registerGlobal();
       this.measure();
       this.loadSettings();
@@ -146,6 +153,7 @@ Component({
     hide() {
       this.halt("已离开页面，回答已停止，可回来继续。");
       this._visible = false;
+      overlays.close(this);
     },
     resize() {
       this.measure();
@@ -158,10 +166,10 @@ Component({
         getApp().globalData.openAI = this._openHandler;
       } catch (error) {}
     },
-    safeSet(patch) {
+    safeSet(patch, callback) {
       if (Object.prototype.hasOwnProperty.call(patch, "question"))
         patch.canSend = !!String(patch.question || "").trim();
-      if (this._alive) this.setData(patch);
+      if (this._alive) this.setData(patch, callback);
     },
     toggleMenu() {
       this.safeSet({ menuOpen: !this.data.menuOpen });
@@ -170,6 +178,7 @@ Component({
       if (this.data.menuOpen) this.safeSet({ menuOpen: false });
     },
     toggleAdvanced() { this.safeSet({ advancedOpen: !this.data.advancedOpen }); },
+    toggleScopes() { this.safeSet({ scopesOpen: !this.data.scopesOpen }); },
     togglePreview(event) {
       const field = event.currentTarget.dataset.field;
       if (field === "previewHistoryOpen" || field === "previewDataOpen")
@@ -234,6 +243,9 @@ Component({
           : wx.getSystemInfoSync();
         this._width = info.windowWidth || 375;
         this._height = info.windowHeight || 667;
+        this._safeBottom = info.safeArea
+          ? Math.max(0, this._height - info.safeArea.bottom)
+          : 0;
         this._size = Math.max(44, Math.min(58, (this._width * 104) / 750));
         this._floatWidth = this.data.collapsed
           ? this._size
@@ -245,7 +257,11 @@ Component({
         const x = Number.isFinite(saved.x)
           ? saved.x < this._width / 2 ? 8 : this._width - this._floatWidth - 8
           : this._width - this._floatWidth - 12;
-        const y = Number.isFinite(saved.y) ? saved.y : this._height * 0.57;
+        // 悬浮入口只占屏幕下部边缘，旧的上半屏位置不再盖住日期和页头操作。
+        const minY = Math.max(safeTop + 58, this._height * 0.66);
+        const defaultY = this._height - this._size - this._safeBottom - 18;
+        const y = Number.isFinite(saved.y) && saved.y >= minY
+          ? saved.y : defaultY;
         const pos = this.clampPosition(x, y);
         this.safeSet({
           safeTop,
@@ -264,12 +280,11 @@ Component({
         width = this._width || 375,
         height = this._height || 667;
       const top = this.data.safeTop || 64;
+      const maxY = Math.max(8, height - size - (this._safeBottom || 0) - 16);
+      const minY = Math.min(maxY, Math.max(top + 58, height * 0.66));
       return {
         x: Math.max(8, Math.min(width - (this._floatWidth || size) - 8, x)),
-        y: Math.max(
-          top + 58,
-          Math.min(Math.max(top + 58, height - size - 110), y),
-        ),
+        y: Math.max(minY, Math.min(maxY, y)),
       };
     },
     dragStart(event) {
@@ -350,6 +365,8 @@ Component({
         }
       }
       this._pauseScroll = false;
+      overlays.open(this, () => {
+      if (!this._alive || !this._visible) return;
       this.safeSet({
         opened: true,
         menuOpen: false,
@@ -360,11 +377,12 @@ Component({
       });
       this.renderSession();
       this.measureMessages();
+      });
     },
     closeChat() {
       this.rememberCurrent();
       this.halt("对话已收起，回答已停止。");
-      this.safeSet({ opened: false, collapsed: true, keyboardHeight: 0, menuOpen: false, inputFocused: false });
+      this.safeSet({ opened: false, collapsed: true, keyboardHeight: 0, menuOpen: false, inputFocused: false }, () => overlays.close(this));
       this.measure();
       if (wx.hideKeyboard) wx.hideKeyboard();
     },
@@ -450,6 +468,7 @@ Component({
         time: clockText(message.createdAt),
         sourceLabels: (message.sources || []).filter((item) => Number(item.included) > 0).map((item) => item.label),
         retryable: isLast && message.role === "assistant" && (message.status === "error" || message.status === "aborted") && !hasImage,
+        regeneratable: isLast && message.role === "assistant" && message.status === "complete" && !hasImage,
         imageRetry: isLast && hasImage && (message.status === "error" || message.status === "aborted"),
       });
     },
@@ -506,6 +525,7 @@ Component({
     },
     prompt(event) {
       this.safeSet({ question: event.currentTarget.dataset.text });
+      this.focusInput();
     },
     async chooseImage() {
       if (this.data.running || this.data.testing || this.data.choosingImage)
@@ -839,20 +859,40 @@ Component({
           !sessions.some((item) => item.id === this._session.id)
         )
           sessions.unshift(this._session);
+        // 列表只下发轻量摘要，不把长对话全文重复复制到 sessions/visibleSessions。
+        const rows = sessions.map((item) =>
+            ({
+              id: item.id,
+              title: item.title || "新的小窝对话",
+              updatedAt: item.updatedAt || item.createdAt || "",
+              when: clockText(item.updatedAt || item.createdAt),
+              current: !!(this._session && item.id === this._session.id),
+              messageCount: (item.messages || []).length,
+              snippet: Array.from(String(((item.messages || []).filter((message) => message.content).slice(-1)[0] || {}).content ||
+                (this._drafts || {})[item.id] || "还没写下第一句").replace(/\s+/g, " ")).slice(0, 100).join(""),
+            }),
+          ).sort((a, b) => String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || "")));
         this.safeSet({
           screen: "history",
           menuOpen: false,
-          sessions: sessions.map((item) =>
-            Object.assign({}, item, {
-              when: clockText(item.updatedAt || item.createdAt),
-              current: !!(this._session && item.id === this._session.id),
-            }),
-          ),
+          historyQuery: "",
+          sessions: rows,
+          visibleSessions: rows,
         });
       } catch (error) {
         this.safeSet({ error: "本机历史暂未读取，请稍后重试。" });
       }
     },
+    searchHistory(event) {
+      const historyQuery = String(event.detail.value || "").slice(0, 100);
+      const query = historyQuery.trim().toLowerCase();
+      this.safeSet({
+        historyQuery,
+        visibleSessions: this.data.sessions.filter((item) =>
+          !query || (String(item.title) + " " + item.snippet).toLowerCase().includes(query)),
+      });
+    },
+    clearHistorySearch() { this.searchHistory({ detail: { value: "" } }); },
     openSession(event) {
       try {
         const id = event.currentTarget.dataset.id;
@@ -919,6 +959,7 @@ Component({
           screen: "settings",
           menuOpen: false,
           advancedOpen: false,
+          scopesOpen: false,
           form,
           secretInput: "",
           showSecret: false,
@@ -933,11 +974,9 @@ Component({
     },
     refreshScopeRows() {
       const scopes = this.data.form.scopes || {};
-      this.safeSet({
-        scopeRows: aiContext.SCOPES.map((item) =>
-          Object.assign({}, item, { selected: !!scopes[item.id] }),
-        ),
-      });
+      const scopeRows = aiContext.SCOPES.map((item) =>
+        Object.assign({}, item, { selected: !!scopes[item.id] }));
+      this.safeSet({ scopeRows, formScopeCount: scopeRows.filter((item) => item.selected).length });
     },
     formInput(event) {
       const field = event.currentTarget.dataset.field;

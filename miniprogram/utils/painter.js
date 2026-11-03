@@ -11,7 +11,9 @@ const templates = [
   { id: 'exposure', name: '双重叠影', color: '#f1dce6' },
   { id: 'mirror', name: '镜像贴贴', color: '#f1e4ef' },
   { id: 'dots', name: '波点漏光', color: '#ffe5c4' },
-  { id: 'date', name: '日期拍立得', color: '#fff4d7' }
+  { id: 'date', name: '日期拍立得', color: '#fff4d7' },
+  { id: 'duo', name: '双兔来信', color: '#f4e9e6' },
+  { id: 'strip', name: '三连拍票根', color: '#eee8df' }
 ];
 
 // canvas 字段是小程序 Canvas 2D 可解析的字体族，避免带引号的多重回退串被丢弃。
@@ -67,23 +69,27 @@ function addEllipse(context, cx, cy, rx, ry, rotation) {
   context.closePath();
 }
 
-function cover(context, source, sourceWidth, sourceHeight, x, y, width, height, offset) {
-  const scale = Math.max(width / sourceWidth, height / sourceHeight);
+function cover(context, source, sourceWidth, sourceHeight, x, y, width, height, offset, transform) {
+  const t = transform || {};
+  const rotation = [0, 90, 180, 270].indexOf(Number(t.rotation)) >= 0 ? Number(t.rotation) : 0;
+  const quarter = rotation === 90 || rotation === 270;
+  const boxW = quarter ? sourceHeight : sourceWidth;
+  const boxH = quarter ? sourceWidth : sourceHeight;
+  const scale = Math.max(width / boxW, height / boxH) * number(t.zoom, 1, 1, 3);
   const drawnWidth = sourceWidth * scale;
   const drawnHeight = sourceHeight * scale;
-  const room = (drawnWidth - width) / 2;
-  const safeOffset = Math.max(-room, Math.min(room, offset || 0));
+  const roomX = Math.max(0, (boxW * scale - width) / 2);
+  const roomY = Math.max(0, (boxH * scale - height) / 2);
+  const offsetX = Math.max(-roomX, Math.min(roomX, (offset || 0) + number(t.x, 0, -100, 100) * roomX / 100));
+  const offsetY = number(t.y, 0, -100, 100) * roomY / 100;
   context.save();
   context.beginPath();
   context.rect(x, y, width, height);
   context.clip();
-  context.drawImage(
-    source,
-    x + (width - drawnWidth) / 2 + safeOffset,
-    y + (height - drawnHeight) / 2,
-    drawnWidth,
-    drawnHeight
-  );
+  context.translate(x + width / 2 + offsetX, y + height / 2 + offsetY);
+  context.scale(t.flipX ? -1 : 1, t.flipY ? -1 : 1);
+  context.rotate(rotation * Math.PI / 180);
+  context.drawImage(source, -drawnWidth / 2, -drawnHeight / 2, drawnWidth, drawnHeight);
   context.restore();
 }
 
@@ -126,7 +132,37 @@ function drawSticker(context, sticker) {
   context.lineWidth = 2.4;
   context.strokeStyle = '#6b5b73';
   context.lineJoin = 'round';
-  if (sticker.type === 'ears') {
+  if (sticker.type === 'caption') {
+    const box = layerBox(sticker);
+    if (sticker.background) {
+      context.fillStyle = '#fff9f0';
+      roundPath(context, -box.w / 2, -box.h / 2, box.w, box.h, 7);
+      context.fill();
+    }
+    context.fillStyle = sticker.color;
+    context.font = sticker.fontSize + 'px KaiTi';
+    context.textAlign = 'center';
+    const lines = captionLines(sticker.text);
+    lines.forEach(function (line, index) {
+      context.fillText(line, 0, -lines.length * sticker.fontSize * 0.65 + sticker.fontSize + index * sticker.fontSize * 1.3);
+    });
+  } else if (sticker.type === 'washi') {
+    context.globalAlpha = 0.86;
+    context.fillStyle = sticker.color;
+    context.fillRect(-52, -14, 104, 28);
+    context.strokeStyle = '#fff9f0';
+    context.lineWidth = 2;
+    for (let i = -46; i < 52; i += 13) {
+      context.beginPath(); context.moveTo(i, -14); context.lineTo(i + 17, 14); context.stroke();
+    }
+  } else if (sticker.type === 'flower') {
+    context.fillStyle = sticker.color;
+    for (let i = 0; i < 5; i++) {
+      const angle = i * Math.PI * 2 / 5;
+      context.beginPath(); context.arc(Math.cos(angle) * 18, Math.sin(angle) * 18, 12, 0, Math.PI * 2); context.fill();
+    }
+    context.fillStyle = '#ffe9a8'; context.beginPath(); context.arc(0, 0, 10, 0, Math.PI * 2); context.fill(); context.stroke();
+  } else if (sticker.type === 'ears') {
     context.fillStyle = '#fff9f0';
     context.beginPath();
     addEllipse(context, -15, -13, 12, 38, -0.2);
@@ -311,7 +347,7 @@ function cleanStickers(value) {
   return value
     .slice(0, 32)
     .filter(function (sticker) {
-      return sticker && ['ears', 'carrot', 'heart', 'star'].indexOf(sticker.type) >= 0;
+      return sticker && ['ears', 'carrot', 'heart', 'star', 'flower', 'washi', 'caption'].indexOf(sticker.type) >= 0;
     })
     .map(function (sticker) {
       return {
@@ -320,9 +356,43 @@ function cleanStickers(value) {
         x: number(sticker.x, W / 2, 0, W),
         y: number(sticker.y, H / 2, 0, H),
         scale: number(sticker.scale, 1, 0.25, 4),
-        rotation: number(sticker.rotation, 0, -360, 360)
+        rotation: number(sticker.rotation, 0, -360, 360),
+        locked: sticker.locked === true,
+        hidden: sticker.hidden === true,
+        text: typeof sticker.text === 'string' ? Array.from(sticker.text).slice(0, 40).join('') : '这一刻，慢慢珍藏 ♡',
+        fontSize: number(sticker.fontSize, 22, 14, 36),
+        color: /^#[a-f\d]{6}$/i.test(sticker.color || '') ? sticker.color : '#ce8ba7',
+        background: sticker.background !== false
       };
     });
+}
+
+function captionLines(text) {
+  const lines = [];
+  String(text || ' ').split('\n').forEach(function (paragraph) {
+    const chars = Array.from(paragraph || ' ');
+    for (let i = 0; i < chars.length; i += 12) lines.push(chars.slice(i, i + 12).join(''));
+  });
+  return lines;
+}
+function layerBox(layer) {
+  if (layer.type === 'caption') {
+    const lines = captionLines(layer.text);
+    const longest = lines.reduce(function (max, line) { return Math.max(max, Array.from(line).length); }, 0);
+    return { w: Math.max(44, longest * layer.fontSize + 20), h: lines.length * layer.fontSize * 1.3 + 16 };
+  }
+  return layer.type === 'washi' ? { w: 112, h: 36 } : { w: 74, h: layer.type === 'ears' ? 108 : 80 };
+}
+function hitLayer(layer, point) {
+  if (!layer || layer.hidden || !point) return false;
+  const clean = cleanStickers([layer])[0];
+  if (!clean) return false;
+  const angle = -clean.rotation * Math.PI / 180;
+  const dx = point.x - clean.x, dy = point.y - clean.y;
+  const x = (dx * Math.cos(angle) - dy * Math.sin(angle)) / clean.scale;
+  const y = (dx * Math.sin(angle) + dy * Math.cos(angle)) / clean.scale;
+  const box = layerBox(clean);
+  return Math.abs(x) <= box.w / 2 + 5 && Math.abs(y) <= box.h / 2 + 5;
 }
 
 // 马赛克必须取未落笔的原始照片层，因此先冻结一份画布快照。
@@ -345,9 +415,10 @@ var snapshotCache = { key: null, canvas: null };
 
 function snapshotFor(canvas, signature) {
   if (!signature) return makeSnapshot(canvas);
-  if (snapshotCache.key === signature && snapshotCache.canvas) return snapshotCache.canvas;
+  if (snapshotCache.key === signature && snapshotCache.owner === canvas && snapshotCache.canvas) return snapshotCache.canvas;
   var snap = makeSnapshot(canvas);
   snapshotCache.key = signature;
+  snapshotCache.owner = canvas;
   snapshotCache.canvas = snap;
   return snap;
 }
@@ -436,7 +507,7 @@ function drawStrokes(context, strokes, areas, snapshot) {
 
 /* ---------------- 主渲染 ---------------- */
 
-function renderArtwork(canvas, primaryImage, settings, selectedId, images, signature) {
+function renderArtwork(canvas, primaryImage, settings, selectedId, images, signature, pixelRatio) {
   if (!canvas || typeof canvas.getContext !== 'function') {
     throw new Error('照片画布还没准备好');
   }
@@ -447,12 +518,13 @@ function renderArtwork(canvas, primaryImage, settings, selectedId, images, signa
   images = images && typeof images === 'object' ? images : {};
 
   // 尺寸只在变化时设置：每次赋值都会重新分配整块像素缓冲，拖拽时逐帧重分配会明显掉帧。
-  if (canvas.width !== W * 2) canvas.width = W * 2;
-  if (canvas.height !== H * 2) canvas.height = H * 2;
+  const ratio = pixelRatio === 3 ? 3 : 2;
+  if (canvas.width !== W * ratio) canvas.width = W * ratio;
+  if (canvas.height !== H * ratio) canvas.height = H * ratio;
   const context = canvas.getContext('2d');
   if (!context) throw new Error('当前环境无法打开照片画布');
   context.setTransform(1, 0, 0, 1, 0, 0);
-  context.scale(2, 2);
+  context.scale(ratio, ratio);
   // 画布不清空：下面第一笔就是整幅铺底，全覆盖。
 
 
@@ -488,27 +560,40 @@ function renderArtwork(canvas, primaryImage, settings, selectedId, images, signa
   }
 
   const photoAreas = [];
-  context.fillStyle = meta.color;
+  context.fillStyle = /^#[a-f\d]{6}$/i.test(settings.paper || '') ? settings.paper : meta.color;
   context.fillRect(0, 0, W, H);
   context.strokeStyle = '#d9ccd0';
   context.lineWidth = 1;
   roundPath(context, 9, 9, W - 18, H - 18, 5);
   context.stroke();
 
-  const photo = function (image, x, y, width, height, offset) {
+  const photo = function (image, x, y, width, height, offset, slot) {
     if (!validImage(image)) return;
     const item = drawableFor(image);
     context.save();
     if (item.native) context.filter = filterText;
-    cover(context, item.source, item.w, item.h, x, y, width, height, offset || 0);
+    const individual = Array.isArray(settings.slotTransforms) && typeof slot === 'number' ? settings.slotTransforms[slot] : null;
+    cover(context, item.source, item.w, item.h, x, y, width, height, offset || 0, individual || settings.transform);
     context.restore();
   };
 
-  if (template === 'comic') {
+  if (template === 'duo' || template === 'strip') {
+    const count = template === 'duo' ? 2 : 3;
+    const height = template === 'duo' ? 171 : 111;
+    for (let i = 0; i < count; i++) {
+      const y = 31 + i * (height + 9);
+      photo(imageFor(slots[i] || ''), 27, y, 396, height, 0, i);
+      photoAreas.push(photoPolygon(27, y, 396, height));
+    }
+    if (template === 'strip') {
+      context.fillStyle = '#fff9f0';
+      for (let y = 33; y < 385; y += 23) { context.fillRect(9, y, 9, 12); context.fillRect(432, y, 9, 12); }
+    }
+  } else if (template === 'comic') {
     for (let i = 0; i < 4; i++) {
       const x = 23 + (i % 2) * 206;
       const y = 29 + Math.floor(i / 2) * 183;
-      photo(imageFor(slots[i] || ''), x, y, 198, 175);
+      photo(imageFor(slots[i] || ''), x, y, 198, 175, 0, i);
       photoAreas.push(photoPolygon(x, y, 198, 175));
     }
   } else if (template === 'mirror') {
@@ -605,13 +690,13 @@ function renderArtwork(canvas, primaryImage, settings, selectedId, images, signa
     context.restore();
   }
 
-  context.fillStyle = '#6b5b73';
+  context.fillStyle = /^#[a-f\d]{6}$/i.test(settings.titleColor || '') ? settings.titleColor : '#6b5b73';
   context.textAlign = 'center';
   const fontOption =
     fontOptions.filter(function (item) {
       return item.value === settings.font;
     })[0] || fontOptions[0];
-  context.font = fontOption.canvas;
+  context.font = fontOption.canvas.replace('23px', number(settings.titleSize, 23, 16, 30) + 'px');
   const title =
     typeof settings.title === 'string' && settings.title.trim()
       ? settings.title.slice(0, 200)
@@ -635,19 +720,22 @@ function renderArtwork(canvas, primaryImage, settings, selectedId, images, signa
     typeof settings.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(settings.date)
       ? settings.date.replace(/-/g, '.')
       : defaultDate;
+  let footer = typeof settings.footerText === 'string' ? settings.footerText.slice(0, 60) : '兔兔小窝 · little things, big love';
+  if (template === 'date' || settings.showDate) footer = date + (footer ? ' / ' + footer : '');
+  while (context.measureText(footer).width > 398 && footer.length > 1) footer = footer.slice(0, -2) + '…';
   context.fillText(
-    template === 'date' ? date + '  /  我们的小日子' : '兔兔小窝 · little things, big love',
+    footer,
     W / 2,
     462
   );
 
   stickers.forEach(function (sticker) {
-    drawSticker(context, sticker);
+    if (!sticker.hidden) drawSticker(context, sticker);
   });
 
   const selected = selectedId
     ? stickers.filter(function (sticker) {
-        return sticker.id === selectedId;
+        return sticker.id === selectedId && !sticker.hidden;
       })[0]
     : null;
   if (selected) {
@@ -657,12 +745,8 @@ function renderArtwork(canvas, primaryImage, settings, selectedId, images, signa
     context.strokeStyle = '#b05f84';
     context.lineWidth = 1.2;
     context.setLineDash([4, 3]);
-    context.strokeRect(
-      -37 * selected.scale,
-      -57 * selected.scale,
-      74 * selected.scale,
-      98 * selected.scale
-    );
+    const box = layerBox(selected);
+    context.strokeRect(-box.w * selected.scale / 2, -box.h * selected.scale / 2, box.w * selected.scale, box.h * selected.scale);
     context.restore();
   }
   return canvas;
@@ -673,5 +757,7 @@ module.exports = {
   H: H,
   templates: templates,
   fontOptions: fontOptions,
+  cleanStickers: cleanStickers,
+  hitLayer: hitLayer,
   renderArtwork: renderArtwork
 };

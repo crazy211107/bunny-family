@@ -1,4 +1,5 @@
 const store = require("../../utils/store");
+const overlays = require("../../utils/overlay");
 Component({
   properties: { hideDock: { type: Boolean, value: false } },
   data: {
@@ -70,6 +71,7 @@ Component({
       this.register();
     },
     detached() {
+      overlays.close(this);
       clearTimeout(this.holdTimer);
       clearTimeout(this.burstTimer);
       if (getApp().globalData.openDirectory === this.openHandler)
@@ -77,6 +79,7 @@ Component({
     },
   },
   pageLifetimes: {
+    hide() { this.close(); },
     show() {
       this.register();
       this.syncCaption();
@@ -109,8 +112,8 @@ Component({
     register() {
       this.syncSafeTop();
       this.syncCaption();
-      this.openHandler = () =>
-        this.setData({ directory: true, expanded: false });
+      this.openHandler = () => overlays.open(this, () =>
+        this.setData({ directory: true, expanded: false }));
       getApp().globalData.openDirectory = this.openHandler;
     },
     stop() {},
@@ -149,7 +152,7 @@ Component({
       clearTimeout(this.holdTimer);
     },
     close() {
-      this.setData({ expanded: false, directory: false });
+      this.setData({ expanded: false, directory: false }, () => overlays.close(this));
     },
     chapter(e) {
       this.close();

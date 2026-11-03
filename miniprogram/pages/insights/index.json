@@ -1,1 +1,5 @@
-{}
+{
+  "usingComponents": {
+    "page-heading": "/components/page-heading/index"
+  }
+}

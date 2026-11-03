@@ -1,6 +1,6 @@
 <view class="empty-state">
-  <text class="empty-symbol" wx:if="{{symbol}}">{{symbol}}</text>
+  <view class="empty-illustration" aria-hidden="true"><image src="/assets/ai-bunny.svg" mode="aspectFit" /><text>✿</text></view>
   <text class="empty-text">{{text}}</text>
   <text class="empty-sub" wx:if="{{sub}}">{{sub}}</text>
-  <view wx:if="{{action}}" class="button pink empty-action" bindtap="onAction" hover-class="empty-action-hover" aria-role="button" aria-label="{{action}}">{{action}}</view>
+  <button wx:if="{{action}}" class="button pink empty-action" bindtap="onAction" hover-class="empty-action-hover" aria-role="button" aria-label="{{action}}">{{action}}</button>
 </view>

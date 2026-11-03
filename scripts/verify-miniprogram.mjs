@@ -273,4 +273,4 @@ if (errors.length) {
   for (const item of errors) console.error(`  - ${item}`);
   process.exit(1);
 }
-console.log("✓ 小程序绘图管线通过：8 模板 / 调色双路径 / 四格 / 叠影 / 四笔刷 / 选框 / 脏数据 / 缺图");
+console.log(`✓ 小程序绘图管线通过：${painter.templates.length} 模板 / 调色双路径 / 多图 / 叠影 / 四笔刷 / 选框 / 脏数据 / 缺图`);
